@@ -1,0 +1,18 @@
+spring:
+
+  datasource:
+    url: jdbc:h2:~/sondadb
+    username: elo7
+    password: 123
+    driverClassName: org.h2.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+    show-sql: true
+    format-sql: true
+
+  h2:
+    console:
+      enabled: true
+      path: /h2
