@@ -18,85 +18,95 @@ public class SondaEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @Column(name = "inicial_x", nullable = false)
+    private Integer inicialX;
+    
+    @Column(name = "inicial_y", nullable = false)
+    private Integer inicialY;
+    
+    @Column(name = "direcao_inicial", length = 1, nullable = false)
+    private String direcaoInical;
+    
     @Column(name = "planeta", nullable = false)
     private String planeta;
     
     @Column(name = "tamanho", nullable = false)
     private Integer tamanho;
     
-    @Column(name = "comandos", nullable = false)
-    private String comandos;
-    
     @OneToMany(mappedBy = "sonda", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CoordenadaEntity> coordenadas = new ArrayList<>();
+    private List<HistoricoCoordenadaEntity> coordenadas = new ArrayList<>();
     
-    public SondaEntity(String planeta, Integer tamanho, String comandos) {
+    public SondaEntity(Integer inicialX, Integer inicialY, String direcaoInical,
+                       String planeta, Integer tamanho) {
+        this.inicialX = inicialX;
+        this.inicialY = inicialY;
+        this.direcaoInical = direcaoInical.toUpperCase();
         this.planeta = planeta;
         this.tamanho = tamanho;
-        this.comandos = comandos;
     }
     
-    public void addCoordenada(CoordenadaEntity coordenada) {
+    private void addHistoricoCoordenada(HistoricoCoordenadaEntity coordenada) {
         this.coordenadas.add(coordenada);
         coordenada.setSonda(this);
     }
     
-    public CoordenadaEntity ultimaCoordenada() {
-        if (this.coordenadas != null && !this.coordenadas.isEmpty()) {
+    public HistoricoCoordenadaEntity capturaCoordenadaAtual() {
+        if (this.coordenadas != null && !this.coordenadas.isEmpty())
             return this.coordenadas.get(this.coordenadas.size()-1);
-        }
-        return null;
+        else
+            return new HistoricoCoordenadaEntity(this.inicialX, this.inicialY, this.direcaoInical, "");
     }
     
     public void movimentaSonda(char comando) {
-        CoordenadaEntity ultima = ultimaCoordenada();
+        HistoricoCoordenadaEntity coordenadaAtual = capturaCoordenadaAtual();
         switch (comando) {
             case 'M':
-                andarParaFrente(ultima);
+                andarParaFrente(coordenadaAtual, comando);
                 break;
             case 'L':
-                giraParaEsquerda(ultima);
+                giraParaEsquerda(coordenadaAtual, comando);
                 break;
             case 'R':
-                giraParaDireita(ultima);
+                giraParaDireita(coordenadaAtual, comando);
                 break;
             default:
                 break;
         }
     }
 
-    private void andarParaFrente(CoordenadaEntity ultima) {
-        Integer novoX = ultima.getX();
-        Integer novoY = ultima.getY();
+    private void andarParaFrente(HistoricoCoordenadaEntity coordenadaAtual, char comando) {
+        Integer novoX = coordenadaAtual.getX();
+        Integer novoY = coordenadaAtual.getY();
         
-        switch (ultima.getDirecao()) {
+        switch (coordenadaAtual.getDirecao()) {
             case "E":
-                if (ultima.getX() < this.tamanho)
+                if (coordenadaAtual.getX() < this.tamanho)
                     novoX++;
                 break;
             case "S":
-                if (ultima.getY() > 1)
+                if (coordenadaAtual.getY() > 1)
                     novoY--;
                 break;
             case "W":
-                if (ultima.getX() > 1)
+                if (coordenadaAtual.getX() > 1)
                     novoX--;
                 break;
             case "N":
-                if (ultima.getY() < this.tamanho)
+                if (coordenadaAtual.getY() < this.tamanho)
                     novoY++;
                 break;
             default:
                 break;
         }
     
-        this.addCoordenada(new CoordenadaEntity(novoX, novoY, ultima.getDirecao()));
+        this.addHistoricoCoordenada(new HistoricoCoordenadaEntity(novoX, novoY,
+                coordenadaAtual.getDirecao(), String.valueOf(comando)));
     }
 
-    private void giraParaEsquerda(CoordenadaEntity ultima) {
-        String novaDirecao = ultima.getDirecao();
+    private void giraParaEsquerda(HistoricoCoordenadaEntity coordenadaAtual, char comando) {
+        String novaDirecao = coordenadaAtual.getDirecao();
         
-        switch (ultima.getDirecao()) {
+        switch (coordenadaAtual.getDirecao()) {
             case "E":
                 novaDirecao = "N";
                 break;
@@ -113,13 +123,14 @@ public class SondaEntity implements Serializable {
                 break;
         }
     
-        this.addCoordenada(new CoordenadaEntity(ultima.getX(), ultima.getY(), novaDirecao));
+        this.addHistoricoCoordenada(new HistoricoCoordenadaEntity(coordenadaAtual.getX(), coordenadaAtual.getY(),
+                novaDirecao, String.valueOf(comando)));
     }
 
-    private void giraParaDireita(CoordenadaEntity ultima) {
-        String novaDirecao = ultima.getDirecao();
+    private void giraParaDireita(HistoricoCoordenadaEntity coordenadaAtual, char comando) {
+        String novaDirecao = coordenadaAtual.getDirecao();
         
-        switch (ultima.getDirecao()) {
+        switch (coordenadaAtual.getDirecao()) {
             case "E":
                 novaDirecao =  "S";
                 break;
@@ -135,6 +146,7 @@ public class SondaEntity implements Serializable {
                 break;
         }
     
-        this.addCoordenada(new CoordenadaEntity(ultima.getX(), ultima.getY(), novaDirecao));
+        this.addHistoricoCoordenada(new HistoricoCoordenadaEntity(coordenadaAtual.getX(), coordenadaAtual.getY(),
+                novaDirecao, String.valueOf(comando)));
     }
 }
