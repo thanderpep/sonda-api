@@ -1,5 +1,6 @@
 package br.com.thander.sonda.model.entity;
 
+import br.com.thander.sonda.model.dto.RetornoSondaDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -27,126 +28,63 @@ public class SondaEntity implements Serializable {
     @Column(name = "direcao_inicial", length = 1, nullable = false)
     private String direcaoInical;
     
+    @Column(name = "atual_x")
+    private Integer atualX;
+    
+    @Column(name = "atual_y")
+    private Integer atualY;
+    
+    @Column(name = "direcao_atual", length = 1, nullable = false)
+    private String direcaoAtual;
+    
     @Column(name = "planeta", nullable = false)
     private String planeta;
     
-    @Column(name = "tamanho", nullable = false)
-    private Integer tamanho;
-    
     @OneToMany(mappedBy = "sonda", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<HistoricoCoordenadaEntity> coordenadas = new ArrayList<>();
+    private List<CoordenadaEntity> coordenadas = new ArrayList<>();
     
-    public SondaEntity(Integer inicialX, Integer inicialY, String direcaoInical,
-                       String planeta, Integer tamanho) {
+    public SondaEntity(Integer inicialX, Integer inicialY, String direcaoInical, String planeta) {
         this.inicialX = inicialX;
         this.inicialY = inicialY;
         this.direcaoInical = direcaoInical.toUpperCase();
-        this.planeta = planeta;
-        this.tamanho = tamanho;
+        this.atualX = inicialX;
+        this.atualY = inicialY;
+        this.direcaoAtual = direcaoInical.toUpperCase();
+        this.planeta = planeta.toUpperCase();
+        this.addHistoricoCoordenada(new CoordenadaEntity(inicialX, inicialY, direcaoInical.toUpperCase(), null));
     }
     
-    private void addHistoricoCoordenada(HistoricoCoordenadaEntity coordenada) {
+    public CoordenadaEntity coordenadaAtual() {
+        if (this.coordenadas != null && !this.coordenadas.isEmpty()) {
+            return this.coordenadas.get(this.coordenadas.size()-1);
+        }
+        return null;
+    }
+    
+    private void addHistoricoCoordenada(CoordenadaEntity coordenada) {
         this.coordenadas.add(coordenada);
         coordenada.setSonda(this);
     }
     
-    public HistoricoCoordenadaEntity capturaCoordenadaAtual() {
-        if (this.coordenadas != null && !this.coordenadas.isEmpty())
-            return this.coordenadas.get(this.coordenadas.size()-1);
-        else
-            return new HistoricoCoordenadaEntity(this.inicialX, this.inicialY, this.direcaoInical, "");
+    public void mover(char comando) {
+        CoordenadaEntity novaCoordenada = coordenadaAtual().calculaProximaCoordenada(comando);
+        this.addHistoricoCoordenada(novaCoordenada);
+        this.atualX = novaCoordenada.getX();
+        this.atualY = novaCoordenada.getY();
+        this.direcaoAtual = novaCoordenada.getDirecao();
     }
     
-    public void movimentaSonda(char comando) {
-        HistoricoCoordenadaEntity coordenadaAtual = capturaCoordenadaAtual();
-        switch (comando) {
-            case 'M':
-                andarParaFrente(coordenadaAtual, comando);
-                break;
-            case 'L':
-                giraParaEsquerda(coordenadaAtual, comando);
-                break;
-            case 'R':
-                giraParaDireita(coordenadaAtual, comando);
-                break;
-            default:
-                break;
-        }
+    public RetornoSondaDTO converteParaRetornoColisaoPouso(String erro){
+        return new RetornoSondaDTO(this.inicialX, this.inicialY, this.direcaoInical, this.planeta, erro);
     }
-
-    private void andarParaFrente(HistoricoCoordenadaEntity coordenadaAtual, char comando) {
-        Integer novoX = coordenadaAtual.getX();
-        Integer novoY = coordenadaAtual.getY();
-        
-        switch (coordenadaAtual.getDirecao()) {
-            case "E":
-                if (coordenadaAtual.getX() < this.tamanho)
-                    novoX++;
-                break;
-            case "S":
-                if (coordenadaAtual.getY() > 1)
-                    novoY--;
-                break;
-            case "W":
-                if (coordenadaAtual.getX() > 1)
-                    novoX--;
-                break;
-            case "N":
-                if (coordenadaAtual.getY() < this.tamanho)
-                    novoY++;
-                break;
-            default:
-                break;
-        }
     
-        this.addHistoricoCoordenada(new HistoricoCoordenadaEntity(novoX, novoY,
-                coordenadaAtual.getDirecao(), String.valueOf(comando)));
+    public RetornoSondaDTO converteParaRetornoColisaoMovimento(String erro){
+        return new RetornoSondaDTO(this.id, this.inicialX, this.inicialY, this.direcaoInical,
+                this.atualX, this.atualY, this.direcaoAtual, this.planeta, erro);
     }
-
-    private void giraParaEsquerda(HistoricoCoordenadaEntity coordenadaAtual, char comando) {
-        String novaDirecao = coordenadaAtual.getDirecao();
-        
-        switch (coordenadaAtual.getDirecao()) {
-            case "E":
-                novaDirecao = "N";
-                break;
-            case "N":
-                novaDirecao = "W";
-                break;
-            case "W":
-                novaDirecao = "S";
-                break;
-            case "S":
-                novaDirecao = "E";
-                break;
-            default:
-                break;
-        }
     
-        this.addHistoricoCoordenada(new HistoricoCoordenadaEntity(coordenadaAtual.getX(), coordenadaAtual.getY(),
-                novaDirecao, String.valueOf(comando)));
-    }
-
-    private void giraParaDireita(HistoricoCoordenadaEntity coordenadaAtual, char comando) {
-        String novaDirecao = coordenadaAtual.getDirecao();
-        
-        switch (coordenadaAtual.getDirecao()) {
-            case "E":
-                novaDirecao =  "S";
-                break;
-            case "S":
-                novaDirecao =  "W";
-                break;
-            case "W":
-                novaDirecao =  "N";
-                break;
-            case "N":
-                novaDirecao =  "E";
-            default:
-                break;
-        }
-    
-        this.addHistoricoCoordenada(new HistoricoCoordenadaEntity(coordenadaAtual.getX(), coordenadaAtual.getY(),
-                novaDirecao, String.valueOf(comando)));
+    public RetornoSondaDTO converteParaRetornoSondaSucesso(){
+        return new RetornoSondaDTO(this.id, this.inicialX, this.inicialY, this.direcaoInical,
+                this.atualX, this.atualY, this.direcaoAtual, this.planeta);
     }
 }

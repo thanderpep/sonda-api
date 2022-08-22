@@ -8,20 +8,19 @@ import javax.validation.constraints.*;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SondaDTO {
+public class EntradaSondaDTO {
     
     @NotBlank(message = "Planeta deve ser informado")
     private String planeta;
     
-    @NotNull(message = "Tamanho da aresta da área do planeta deve ser informada")
-    private Integer tamanho;
-    
     @NotNull(message = "Posição inicial X deve ser informada")
-    @Min(value = 1, message = "Posição inicial X deve ser maior que 0")
+    @Min(value = 1, message = "Posição inicial X deve ser entre 1 e 5")
+    @Max(value = 5, message = "Posição inicial X deve ser entre 1 e 5")
     private Integer inicialX;
     
     @NotNull(message = "Posição inicial Y deve ser informada")
-    @Min(value = 1, message = "Posição inicial Y deve ser maior que 0")
+    @Min(value = 1, message = "Posição inicial Y deve ser entre 1 e 5")
+    @Max(value = 5, message = "Posição inicial Y deve ser entre 1 e 5")
     private Integer inicialY;
     
     @NotBlank(message = "Direção inicial deve ser informada")
@@ -34,8 +33,10 @@ public class SondaDTO {
     private String comandos;
     
     public SondaEntity converteParaSondaEntity() {
-        SondaEntity sonda = new SondaEntity(this.inicialX, this.inicialY, this.direcaoInical,
-                this.planeta, this.tamanho);
-        return sonda;
+        return new SondaEntity(this.inicialX, this.inicialY, this.direcaoInical, this.planeta);
     }
+    
+//    public SaidaSondaDTO converteParaSaidaSondaDTO(){
+//        return new SaidaSondaDTO(this.inicialX, this.inicialY, this.direcaoInical, this.planeta, this.comandos);
+//    }
 }

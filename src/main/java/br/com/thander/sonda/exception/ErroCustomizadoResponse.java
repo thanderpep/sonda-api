@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class CustomErrorResponse {
+public class ErroCustomizadoResponse {
     
     private String timestamp;
     private int status;

@@ -16,14 +16,14 @@ import java.time.format.DateTimeFormatter;
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler()
-    public ResponseEntity<CustomErrorResponse> springCustomHandle(Exception ex, HttpServletResponse response) throws IOException {
+    public ResponseEntity<ErroCustomizadoResponse> springCustomHandle(Exception ex, HttpServletResponse response) throws IOException {
         HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         
-        if (ex instanceof IllegalArgumentException || ex instanceof InvalidParameterException) {
+        if (ex instanceof IllegalArgumentException || ex instanceof ParametroInvalidoException) {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
     
-        CustomErrorResponse customError = CustomErrorResponse.builder()
+        ErroCustomizadoResponse customError = ErroCustomizadoResponse.builder()
                 .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                 .status(httpStatus.value())
                 .error(httpStatus.name())

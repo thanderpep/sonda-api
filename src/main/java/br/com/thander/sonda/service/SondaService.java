@@ -1,11 +1,17 @@
 package br.com.thander.sonda.service;
 
-import br.com.thander.sonda.model.dto.SondaDTO;
+import br.com.thander.sonda.model.dto.EntradaSondaDTO;
+import br.com.thander.sonda.model.dto.RetornoSondaDTO;
+import br.com.thander.sonda.model.entity.CoordenadaEntity;
 import br.com.thander.sonda.model.entity.SondaEntity;
 import br.com.thander.sonda.repository.SondaRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -14,27 +20,75 @@ public class SondaService {
     @Autowired
     private SondaRepository sondaRepository;
     
-    public SondaDTO lancaSonda(SondaDTO sondaDTO) {
-        // Salva no banco de dados o estado inicial da sonda
-        SondaEntity sondaEntity = sondaRepository.saveAndFlush(sondaDTO.converteParaSondaEntity());
-        log.info(String.format("Posição de pouso da sonda %d: %s", sondaEntity.getId(), sondaEntity.capturaCoordenadaAtual().toString()));
+    public List<?> lancaSonda(List<EntradaSondaDTO> entradaSondaDTOLista) {
+        List<RetornoSondaDTO> retornoSondaLista = new ArrayList<>();
         
-        executaComandos(sondaEntity, sondaDTO.getComandos());
-        
-        log.info(String.format("Posição final da sonda %d: %s", sondaEntity.getId(), sondaEntity.capturaCoordenadaAtual().toString()));
-        return sondaDTO;
+        for (EntradaSondaDTO sondaDTO : entradaSondaDTOLista) {
+            SondaEntity sondaEntity = sondaDTO.converteParaSondaEntity();
+            
+            // Verifica se existe sonda parada na coordenada de pouso
+            RetornoSondaDTO retorno = verificaColisao(sondaEntity.coordenadaAtual());
+            
+            if (retorno != null) {
+                retornoSondaLista.add(retorno);
+                continue;
+            }
+            
+            // Salva no banco de dados o estado inicial da sonda
+            sondaEntity = sondaRepository.saveAndFlush(sondaEntity);
+            log.info(String.format("Posição de pouso da sonda %d: %s", sondaEntity.getId(), sondaEntity.coordenadaAtual()));
+            
+            retorno = executaComandos(sondaEntity, sondaDTO.getComandos());
+            
+            if (retorno != null) {
+                retorno.setComandos(sondaDTO.getComandos());
+                retornoSondaLista.add(retorno);
+            }
+            log.info(String.format("Posição final da sonda %d: %s", sondaEntity.getId(), sondaEntity.coordenadaAtual()));
+        }
+        return retornoSondaLista;
     }
     
-    private void executaComandos(SondaEntity sondaEntity, String comandos) {
+    private RetornoSondaDTO verificaColisao(CoordenadaEntity coordenada) {
+        Optional<SondaEntity> sonda = sondaRepository.findByPlanetaAndAtualXAndAtualY(
+                coordenada.getSonda().getPlaneta(), coordenada.getX(), coordenada.getY());
+        
+        if (sonda.isPresent() && sonda.get().getId() != coordenada.getSonda().getId()) {
+            StringBuffer erro = new StringBuffer(String.format(
+                    "As coordenadas x=%d, y=%d já estão ocupadas pela sonda %d. ",
+                    coordenada.getX(), coordenada.getY(), sonda.get().getId()));
+            
+            if (coordenada.getSonda().getId() == null) {
+                erro.append("Não é possível pousar neste ponto.");
+                return coordenada.getSonda().converteParaRetornoColisaoPouso(erro.toString());
+            } else {
+                erro.append(String.format("Não é possível mover para este ponto. A sonda %d ficou parada nas " +
+                        "coordenadas %s", coordenada.getSonda().getId(), coordenada.getSonda().coordenadaAtual()));
+                return coordenada.getSonda().converteParaRetornoColisaoMovimento(erro.toString());
+            }
+        }
+        return null;
+    }
+    
+    private RetornoSondaDTO executaComandos(SondaEntity sondaEntity, String comandos) {
+        RetornoSondaDTO retorno;
         if (comandos != null && !comandos.isEmpty()) {
             log.info(String.format("Sequência de comandos: %s", comandos));
+            
             // itera os comandos para movimentar a sonda
             for (char comando : comandos.toCharArray()) {
-                sondaEntity.movimentaSonda(comando);
+                CoordenadaEntity proxCoordenada = sondaEntity.coordenadaAtual().calculaProximaCoordenada(comando);
+                retorno = verificaColisao(proxCoordenada);
+                
+                if (retorno != null)
+                    return retorno;
+                
+                sondaEntity.mover(comando);
+                sondaRepository.saveAndFlush(sondaEntity);
             }
-            sondaRepository.saveAndFlush(sondaEntity);
         } else {
             log.info(String.format("Sonda %d - Nenhum comando a executar.", sondaEntity.getId()));
         }
+        return sondaEntity.converteParaRetornoSondaSucesso();
     }
 }
