@@ -24,14 +24,14 @@ public class SondaController {
     private SondaService sondaService;
     
     @PostMapping
-    public ResponseEntity<List<?>> lancaSonda(
+    public ResponseEntity<List<RetornoSondaDTO>> criaSonda(
             @RequestBody @Valid List<EntradaSondaDTO> entradaSondaDTOLista, BindingResult errors) {
         
         // Valida a entrada de dados do usuário
         if (errors.hasErrors())
             throw new ParametroInvalidoException(errors.getFieldError().getDefaultMessage());
     
-        List<?> sondas = sondaService.lancaSonda(entradaSondaDTOLista);
+        List<RetornoSondaDTO> sondas = sondaService.criaSonda(entradaSondaDTOLista);
         return new ResponseEntity<>(sondas, HttpStatus.CREATED);
     }
 }

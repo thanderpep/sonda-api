@@ -10,6 +10,9 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+/***
+ * Classe responsável por armazenar coordenadas de uma sonda
+ */
 @Getter
 @Entity
 @Table(name = "coordenada")
@@ -48,6 +51,11 @@ public class CoordenadaEntity implements Serializable {
         this.comando = comando;
     }
     
+    /***
+     * Calcula a próxima coordenada a partir de um comando a ser executado
+     * @param comando caracteres M, L ou R
+     * @return CoordenadaEntity contendo os dados da próxima coordenada
+     */
     public CoordenadaEntity calculaProximaCoordenada(char comando) {
         switch (comando) {
             case 'M':

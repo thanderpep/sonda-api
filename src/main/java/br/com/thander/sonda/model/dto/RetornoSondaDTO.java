@@ -3,7 +3,6 @@ package br.com.thander.sonda.model.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
@@ -17,9 +16,8 @@ public class RetornoSondaDTO {
     private Integer atualY;
     private String direcaoAtual;
     private String planeta;
-    private String erro;
-    @Setter
     private String comandos;
+    private String erro;
     
     /***
      * Construtor usado para casos em que a sonda não pode pousar em uma posição já ocupada
@@ -27,13 +25,15 @@ public class RetornoSondaDTO {
      * @param inicialY
      * @param direcaoInical
      * @param planeta
+     * @param comandos
      * @param erro
      */
-    public RetornoSondaDTO(Integer inicialX, Integer inicialY, String direcaoInical, String planeta, String erro){
+    public RetornoSondaDTO(Integer inicialX, Integer inicialY, String direcaoInical, String planeta, String comandos, String erro){
         this.inicialX = inicialX;
         this.inicialY = inicialY;
         this.direcaoInical = direcaoInical.toUpperCase();
         this.planeta = planeta.toUpperCase();
+        this.comandos = comandos.toUpperCase();
         this.erro = erro;
     }
     
@@ -47,11 +47,13 @@ public class RetornoSondaDTO {
      * @param atualY
      * @param direcaoAtual
      * @param planeta
+     * @param comandos
      * @param erro
      */
     public RetornoSondaDTO(Long sondaId, Integer inicialX, Integer inicialY, String direcaoInical,
-                           Integer atualX, Integer atualY, String direcaoAtual, String planeta, String erro){
-        this(inicialX, inicialY, direcaoInical, planeta, erro);
+                           Integer atualX, Integer atualY, String direcaoAtual, String planeta,
+                           String comandos, String erro){
+        this(inicialX, inicialY, direcaoInical, planeta, comandos, erro);
         this.sondaId = sondaId;
         this.atualX = atualX;
         this.atualY = atualY;
@@ -68,9 +70,10 @@ public class RetornoSondaDTO {
      * @param atualY
      * @param direcaoAtual
      * @param planeta
+     * @param comandos
      */
     public RetornoSondaDTO(Long sondaId, Integer inicialX, Integer inicialY, String direcaoInical,
-                           Integer atualX, Integer atualY, String direcaoAtual, String planeta){
-        this(sondaId, inicialX, inicialY, direcaoInical, atualX, atualY, direcaoAtual, planeta, null);
+                           Integer atualX, Integer atualY, String direcaoAtual, String planeta, String comandos){
+        this(sondaId, inicialX, inicialY, direcaoInical, atualX, atualY, direcaoAtual, planeta, comandos, null);
     }
 }

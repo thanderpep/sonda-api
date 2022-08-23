@@ -20,7 +20,7 @@ public class SondaService {
     @Autowired
     private SondaRepository sondaRepository;
     
-    public List<?> lancaSonda(List<EntradaSondaDTO> entradaSondaDTOLista) {
+    public List<RetornoSondaDTO> criaSonda(List<EntradaSondaDTO> entradaSondaDTOLista) {
         List<RetornoSondaDTO> retornoSondaLista = new ArrayList<>();
         
         for (EntradaSondaDTO sondaDTO : entradaSondaDTOLista) {
@@ -39,16 +39,19 @@ public class SondaService {
             log.info(String.format("Posição de pouso da sonda %d: %s", sondaEntity.getId(), sondaEntity.coordenadaAtual()));
             
             retorno = executaComandos(sondaEntity, sondaDTO.getComandos());
+            retornoSondaLista.add(retorno);
             
-            if (retorno != null) {
-                retorno.setComandos(sondaDTO.getComandos());
-                retornoSondaLista.add(retorno);
-            }
             log.info(String.format("Posição final da sonda %d: %s", sondaEntity.getId(), sondaEntity.coordenadaAtual()));
         }
         return retornoSondaLista;
     }
     
+    /***
+     * Verifica se a coordenada informada está ocupada por outra sonda no mesmo planeta
+     * @param coordenada CoordenadaEntity
+     * @return RetornoSondaDTO com dados sobre colisão de sondas ou null caso a coordenada
+     * não esteja ocupada por outra sonda
+     */
     private RetornoSondaDTO verificaColisao(CoordenadaEntity coordenada) {
         Optional<SondaEntity> sonda = sondaRepository.findByPlanetaAndAtualXAndAtualY(
                 coordenada.getSonda().getPlaneta(), coordenada.getX(), coordenada.getY());
@@ -70,6 +73,13 @@ public class SondaService {
         return null;
     }
     
+    /***
+     * Executa uma sequência de comandos para mover uma sonda
+     * @param sondaEntity SondaEntity
+     * @param comandos String de sequência de comandos
+     * @return RetornoSondaDTO com dados sobre colisão de sondas ou RetornoSondaDTO com dados de sucesso
+     * e posições da sonda
+     */
     private RetornoSondaDTO executaComandos(SondaEntity sondaEntity, String comandos) {
         RetornoSondaDTO retorno;
         if (comandos != null && !comandos.isEmpty()) {
