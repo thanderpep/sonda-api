@@ -1,21 +1,18 @@
 package br.com.thander.sonda.controller;
 
-import br.com.thander.sonda.exception.ParametroInvalidoException;
 import br.com.thander.sonda.model.dto.EntradaSondaDTO;
 import br.com.thander.sonda.model.dto.RetornoSondaDTO;
 import br.com.thander.sonda.service.SondaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/sonda")
 public class SondaController {
@@ -24,14 +21,18 @@ public class SondaController {
     private SondaService sondaService;
     
     @PostMapping
-    public ResponseEntity<List<RetornoSondaDTO>> criaSonda(
+    @ResponseStatus(HttpStatus.CREATED)
+    public List<RetornoSondaDTO> criaSonda(
             @RequestBody @Valid List<EntradaSondaDTO> entradaSondaDTOLista, BindingResult errors) {
-        
         // Valida a entrada de dados do usuário
-        if (errors.hasErrors())
-            throw new ParametroInvalidoException(errors.getFieldError().getDefaultMessage());
+//        if (errors.hasErrors())
+//            throw new IllegalArgumentException(errors.getFieldError().getDefaultMessage());
+        return sondaService.criaSonda(entradaSondaDTOLista);
+    }
     
-        List<RetornoSondaDTO> sondas = sondaService.criaSonda(entradaSondaDTOLista);
-        return new ResponseEntity<>(sondas, HttpStatus.CREATED);
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public RetornoSondaDTO buscaSonda(@PathVariable("id") Long sondaId) {
+        return sondaService.buscaSondaPorId(sondaId);
     }
 }

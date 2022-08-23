@@ -35,8 +35,4 @@ public class EntradaSondaDTO {
     public SondaEntity converteParaSondaEntity() {
         return new SondaEntity(this.inicialX, this.inicialY, this.direcaoInical, this.planeta, this.comandos);
     }
-    
-//    public SaidaSondaDTO converteParaSaidaSondaDTO(){
-//        return new SaidaSondaDTO(this.inicialX, this.inicialY, this.direcaoInical, this.planeta, this.comandos);
-//    }
 }

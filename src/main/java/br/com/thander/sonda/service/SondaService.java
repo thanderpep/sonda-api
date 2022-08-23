@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -100,5 +101,11 @@ public class SondaService {
             log.info(String.format("Sonda %d - Nenhum comando a executar.", sondaEntity.getId()));
         }
         return sondaEntity.converteParaRetornoSondaSucesso();
+    }
+    
+    public RetornoSondaDTO buscaSondaPorId(Long sondaId) {
+        return sondaRepository.findById(sondaId)
+                .map(s -> s.converteParaRetornoSondaSucesso())
+                .orElseThrow(() -> new EntityNotFoundException("Sonda não encontrada"));
     }
 }

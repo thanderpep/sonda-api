@@ -1,5 +1,6 @@
 package br.com.thander.sonda.model.entity;
 
+import br.com.thander.sonda.model.dto.CoordenadaDTO;
 import br.com.thander.sonda.model.dto.RetornoSondaDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /***
  * Classe responsável por armazenar dados de uma sonda
@@ -100,8 +102,11 @@ public class SondaEntity implements Serializable {
      * @return RetornoSondaDTO com dados de colisão de uma sonda ao movimentar para uma coordenada já ocupada
      */
     public RetornoSondaDTO converteParaRetornoColisaoMovimento(String erro){
+        List<CoordenadaDTO> coordenadaDTOList = coordenadas.stream()
+                .map(CoordenadaEntity::converteParaCoordenadaDTO).collect(Collectors.toList());
         return new RetornoSondaDTO(this.id, this.inicialX, this.inicialY, this.direcaoInical,
-                this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando, erro);
+                this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando,
+                coordenadaDTOList, erro);
     }
     
     /***
@@ -109,7 +114,9 @@ public class SondaEntity implements Serializable {
      * @return RetornoSondaDTO com dados de uma sonda que pousou ou se movimentou com sucesso
      */
     public RetornoSondaDTO converteParaRetornoSondaSucesso(){
+        List<CoordenadaDTO> coordenadaDTOList = coordenadas.stream()
+                .map(CoordenadaEntity::converteParaCoordenadaDTO).collect(Collectors.toList());
         return new RetornoSondaDTO(this.id, this.inicialX, this.inicialY, this.direcaoInical,
-                this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando);
+                this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando, coordenadaDTOList);
     }
 }

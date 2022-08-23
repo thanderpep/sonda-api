@@ -1,5 +1,6 @@
 package br.com.thander.sonda.model.entity;
 
+import br.com.thander.sonda.model.dto.CoordenadaDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -166,5 +167,9 @@ public class CoordenadaEntity implements Serializable {
             default:
                 return "direção inválida";
         }
+    }
+    
+    public CoordenadaDTO converteParaCoordenadaDTO(){
+        return new CoordenadaDTO(this.x, this.y, this.direcao, this.comando);
     }
 }

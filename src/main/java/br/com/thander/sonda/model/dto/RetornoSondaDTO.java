@@ -4,10 +4,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RetornoSondaDTO {
+    
     private Long sondaId;
     private Integer inicialX;
     private Integer inicialY;
@@ -17,6 +20,7 @@ public class RetornoSondaDTO {
     private String direcaoAtual;
     private String planeta;
     private String comandos;
+    private List<CoordenadaDTO> coordenadas;
     private String erro;
     
     /***
@@ -52,12 +56,13 @@ public class RetornoSondaDTO {
      */
     public RetornoSondaDTO(Long sondaId, Integer inicialX, Integer inicialY, String direcaoInical,
                            Integer atualX, Integer atualY, String direcaoAtual, String planeta,
-                           String comandos, String erro){
+                           String comandos, List<CoordenadaDTO> coordenadas, String erro){
         this(inicialX, inicialY, direcaoInical, planeta, comandos, erro);
         this.sondaId = sondaId;
         this.atualX = atualX;
         this.atualY = atualY;
         this.direcaoAtual = direcaoAtual.toUpperCase();
+        this.coordenadas = coordenadas;
     }
     
     /***
@@ -73,7 +78,9 @@ public class RetornoSondaDTO {
      * @param comandos
      */
     public RetornoSondaDTO(Long sondaId, Integer inicialX, Integer inicialY, String direcaoInical,
-                           Integer atualX, Integer atualY, String direcaoAtual, String planeta, String comandos){
-        this(sondaId, inicialX, inicialY, direcaoInical, atualX, atualY, direcaoAtual, planeta, comandos, null);
+                           Integer atualX, Integer atualY, String direcaoAtual, String planeta,
+                           String comandos, List<CoordenadaDTO> coordenadas){
+        this(sondaId, inicialX, inicialY, direcaoInical, atualX, atualY, direcaoAtual, planeta,
+                comandos, coordenadas, null);
     }
 }
