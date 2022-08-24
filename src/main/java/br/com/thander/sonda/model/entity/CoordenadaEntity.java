@@ -80,11 +80,11 @@ public class CoordenadaEntity implements Serializable {
                     novoX++;
                 break;
             case "S":
-                if (this.y > 1)
+                if (this.y > 0)
                     novoY--;
                 break;
             case "W":
-                if (this.x > 1)
+                if (this.x > 0)
                     novoX--;
                 break;
             case "N":

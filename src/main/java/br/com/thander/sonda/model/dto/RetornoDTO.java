@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RetornoSondaDTO {
+public class RetornoDTO {
     
     private Long sondaId;
     private Integer inicialX;
@@ -19,7 +19,7 @@ public class RetornoSondaDTO {
     private Integer atualY;
     private String direcaoAtual;
     private String planeta;
-    private String comandos;
+    private String ultimoComando;
     private List<CoordenadaDTO> coordenadas;
     private String erro;
     
@@ -32,12 +32,12 @@ public class RetornoSondaDTO {
      * @param comandos
      * @param erro
      */
-    public RetornoSondaDTO(Integer inicialX, Integer inicialY, String direcaoInical, String planeta, String comandos, String erro){
+    public RetornoDTO(Integer inicialX, Integer inicialY, String direcaoInical, String planeta, String comandos, String erro){
         this.inicialX = inicialX;
         this.inicialY = inicialY;
         this.direcaoInical = direcaoInical.toUpperCase();
         this.planeta = planeta.toUpperCase();
-        this.comandos = comandos.toUpperCase();
+        this.ultimoComando = comandos.toUpperCase();
         this.erro = erro;
     }
     
@@ -52,11 +52,12 @@ public class RetornoSondaDTO {
      * @param direcaoAtual
      * @param planeta
      * @param comandos
+     * @param coordenadas
      * @param erro
      */
-    public RetornoSondaDTO(Long sondaId, Integer inicialX, Integer inicialY, String direcaoInical,
-                           Integer atualX, Integer atualY, String direcaoAtual, String planeta,
-                           String comandos, List<CoordenadaDTO> coordenadas, String erro){
+    public RetornoDTO(Long sondaId, Integer inicialX, Integer inicialY, String direcaoInical,
+                      Integer atualX, Integer atualY, String direcaoAtual, String planeta,
+                      String comandos, List<CoordenadaDTO> coordenadas, String erro){
         this(inicialX, inicialY, direcaoInical, planeta, comandos, erro);
         this.sondaId = sondaId;
         this.atualX = atualX;
@@ -76,10 +77,11 @@ public class RetornoSondaDTO {
      * @param direcaoAtual
      * @param planeta
      * @param comandos
+     * @param coordenadas
      */
-    public RetornoSondaDTO(Long sondaId, Integer inicialX, Integer inicialY, String direcaoInical,
-                           Integer atualX, Integer atualY, String direcaoAtual, String planeta,
-                           String comandos, List<CoordenadaDTO> coordenadas){
+    public RetornoDTO(Long sondaId, Integer inicialX, Integer inicialY, String direcaoInical,
+                      Integer atualX, Integer atualY, String direcaoAtual, String planeta,
+                      String comandos, List<CoordenadaDTO> coordenadas){
         this(sondaId, inicialX, inicialY, direcaoInical, atualX, atualY, direcaoAtual, planeta,
                 comandos, coordenadas, null);
     }

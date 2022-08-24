@@ -1,9 +1,10 @@
 package br.com.thander.sonda.model.entity;
 
 import br.com.thander.sonda.model.dto.CoordenadaDTO;
-import br.com.thander.sonda.model.dto.RetornoSondaDTO;
+import br.com.thander.sonda.model.dto.RetornoDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -45,6 +46,7 @@ public class SondaEntity implements Serializable {
     @Column(name = "planeta", nullable = false)
     private String planeta;
     
+    @Setter
     private String ultimoComando;
     
     @OneToMany(mappedBy = "sonda", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -87,36 +89,46 @@ public class SondaEntity implements Serializable {
     }
     
     /***
-     * Converte um objeto SondaEntity para RetornoSondaDTO com dados básicos de uma sonda que não foi possível pousar
+     * Converte um objeto SondaEntity para RetornoDTO com dados básicos de uma sonda que não foi possível pousar
      * @param erro String com mensagem de erro
-     * @return RetornoSondaDTO com dados de colisão de uma sonda ao pousar
+     * @return RetornoDTO com dados de colisão de uma sonda ao pousar
      */
-    public RetornoSondaDTO converteParaRetornoColisaoPouso(String erro){
-        return new RetornoSondaDTO(this.inicialX, this.inicialY, this.direcaoInical, this.planeta, this.ultimoComando, erro);
+    public RetornoDTO converteParaRetornoColisaoPouso(String erro){
+        return new RetornoDTO(this.inicialX, this.inicialY, this.direcaoInical, this.planeta, this.ultimoComando, erro);
     }
     
     /***
-     * Converte um objeto SondaEntity para RetornoSondaDTO com dados de uma sonda que colidiu
+     * Converte um objeto SondaEntity para RetornoDTO com dados de uma sonda que colidiu
      * com outra a se movimentar
      * @param erro String com mensagem de erro
-     * @return RetornoSondaDTO com dados de colisão de uma sonda ao movimentar para uma coordenada já ocupada
+     * @return RetornoDTO com dados de colisão de uma sonda ao movimentar para uma coordenada já ocupada
      */
-    public RetornoSondaDTO converteParaRetornoColisaoMovimento(String erro){
+    public RetornoDTO converteParaRetornoColisaoMovimento(String erro){
         List<CoordenadaDTO> coordenadaDTOList = coordenadas.stream()
                 .map(CoordenadaEntity::converteParaCoordenadaDTO).collect(Collectors.toList());
-        return new RetornoSondaDTO(this.id, this.inicialX, this.inicialY, this.direcaoInical,
+        return new RetornoDTO(this.id, this.inicialX, this.inicialY, this.direcaoInical,
                 this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando,
                 coordenadaDTOList, erro);
     }
     
     /***
-     * Converte um objeto SondaEntity para RetornoSondaDTO com dados de uma sonda e seus movimentos
-     * @return RetornoSondaDTO com dados de uma sonda que pousou ou se movimentou com sucesso
+     * Converte um objeto SondaEntity para RetornoDTO com dados de uma sonda e seus movimentos
+     * @return RetornoDTO com dados de uma sonda e seus movimentos caso tenha
      */
-    public RetornoSondaDTO converteParaRetornoSondaSucesso(){
-        List<CoordenadaDTO> coordenadaDTOList = coordenadas.stream()
-                .map(CoordenadaEntity::converteParaCoordenadaDTO).collect(Collectors.toList());
-        return new RetornoSondaDTO(this.id, this.inicialX, this.inicialY, this.direcaoInical,
-                this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando, coordenadaDTOList);
+    public RetornoDTO converteParaRetornoSucesso(){
+        return this.converteParaRetornoSucesso(0);
+    }
+    
+    /***
+     * Converte um objeto SondaEntity para RetornoDTO com dados de uma sonda e seus movimentos
+     * @param index Index inical das coordenadas que deseja no retorno
+     * @return RetornoDTO com dados de uma sonda e seus movimentos caso tenha
+     */
+    public RetornoDTO converteParaRetornoSucesso(int index){
+        List<CoordenadaDTO> coordenadaDTOLista = coordenadas.stream()
+                .map(CoordenadaEntity::converteParaCoordenadaDTO).collect(Collectors.toList())
+                .subList(index, coordenadas.size());
+        return new RetornoDTO(this.id, coordenadaDTOLista.get(0).getX(), coordenadaDTOLista.get(0).getY(),
+                this.direcaoInical, this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando, coordenadaDTOLista);
     }
 }

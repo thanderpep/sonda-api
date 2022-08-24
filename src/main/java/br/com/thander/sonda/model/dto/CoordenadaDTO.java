@@ -13,5 +13,5 @@ public class CoordenadaDTO {
     private Integer x;
     private Integer y;
     private String direcao;
-    private String comando;
+    private String comandoExecutado;
 }

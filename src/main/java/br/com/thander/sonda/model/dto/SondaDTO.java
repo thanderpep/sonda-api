@@ -8,19 +8,19 @@ import javax.validation.constraints.*;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class EntradaSondaDTO {
+public class SondaDTO {
     
     @NotBlank(message = "Planeta deve ser informado")
     private String planeta;
     
     @NotNull(message = "Posição inicial X deve ser informada")
-    @Min(value = 1, message = "Posição inicial X deve ser entre 1 e 5")
-    @Max(value = 5, message = "Posição inicial X deve ser entre 1 e 5")
+    @Min(value = 0, message = "Posição inicial X deve ser entre 0 e 5")
+    @Max(value = 5, message = "Posição inicial X deve ser entre 0 e 5")
     private Integer inicialX;
     
     @NotNull(message = "Posição inicial Y deve ser informada")
-    @Min(value = 1, message = "Posição inicial Y deve ser entre 1 e 5")
-    @Max(value = 5, message = "Posição inicial Y deve ser entre 1 e 5")
+    @Min(value = 0, message = "Posição inicial Y deve ser entre 0 e 5")
+    @Max(value = 5, message = "Posição inicial Y deve ser entre 0 e 5")
     private Integer inicialY;
     
     @NotBlank(message = "Direção inicial deve ser informada")
