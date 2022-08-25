@@ -58,7 +58,7 @@ public class SondaService {
     private void verificaColisao(CoordenadaEntity coordenada) throws ColisaoException {
         Optional<SondaEntity> sonda = sondaRepository.findByPlanetaAndAtualXAndAtualY(
                 coordenada.getSonda().getPlaneta(), coordenada.getX(), coordenada.getY());
-        if (sonda.isPresent() && sonda.get().getId() != coordenada.getSonda().getId()) {
+        if (sonda.isPresent()) {
             throw new ColisaoException(coordenada);
         }
     }

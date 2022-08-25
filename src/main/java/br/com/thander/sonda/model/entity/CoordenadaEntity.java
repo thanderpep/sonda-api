@@ -2,6 +2,7 @@ package br.com.thander.sonda.model.entity;
 
 import br.com.thander.sonda.model.dto.CoordenadaDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,6 +19,7 @@ import java.sql.Timestamp;
 @Entity
 @Table(name = "coordenada")
 @NoArgsConstructor
+@AllArgsConstructor
 public class CoordenadaEntity implements Serializable {
     
     @Id

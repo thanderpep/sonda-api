@@ -2,6 +2,7 @@ package br.com.thander.sonda.model.entity;
 
 import br.com.thander.sonda.model.dto.CoordenadaDTO;
 import br.com.thander.sonda.model.dto.RetornoDTO;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "sonda")
 @NoArgsConstructor
+@AllArgsConstructor
 public class SondaEntity implements Serializable {
     
     @Id
@@ -60,7 +62,7 @@ public class SondaEntity implements Serializable {
         this.atualY = inicialY;
         this.direcaoAtual = direcaoInical.toUpperCase();
         this.planeta = planeta.toUpperCase();
-        this.ultimoComando = ultimoComando.toUpperCase();
+        this.ultimoComando = ultimoComando;
         this.addCoordenada(new CoordenadaEntity(inicialX, inicialY, direcaoInical.toUpperCase(), null));
     }
     
@@ -71,7 +73,10 @@ public class SondaEntity implements Serializable {
         return null;
     }
     
-    private void addCoordenada(CoordenadaEntity coordenada) {
+    public void addCoordenada(CoordenadaEntity coordenada) {
+        this.atualX = coordenada.getX();
+        this.atualY = coordenada.getY();
+        this.direcaoAtual = coordenada.getDirecao();
         this.coordenadas.add(coordenada);
         coordenada.setSonda(this);
     }
@@ -83,9 +88,6 @@ public class SondaEntity implements Serializable {
     public void mover(char comando) {
         CoordenadaEntity novaCoordenada = coordenadaAtual().calculaProximaCoordenada(comando);
         this.addCoordenada(novaCoordenada);
-        this.atualX = novaCoordenada.getX();
-        this.atualY = novaCoordenada.getY();
-        this.direcaoAtual = novaCoordenada.getDirecao();
     }
     
     /***
@@ -129,6 +131,6 @@ public class SondaEntity implements Serializable {
                 .map(CoordenadaEntity::converteParaCoordenadaDTO).collect(Collectors.toList())
                 .subList(index, coordenadas.size());
         return new RetornoDTO(this.id, coordenadaDTOLista.get(0).getX(), coordenadaDTOLista.get(0).getY(),
-                this.direcaoInical, this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando, coordenadaDTOLista);
+                coordenadaDTOLista.get(0).getDirecao(), this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando, coordenadaDTOLista);
     }
 }

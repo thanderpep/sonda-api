@@ -2,12 +2,10 @@ package br.com.thander.sonda.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
-@NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RetornoDTO {
     
@@ -37,7 +35,7 @@ public class RetornoDTO {
         this.inicialY = inicialY;
         this.direcaoInical = direcaoInical.toUpperCase();
         this.planeta = planeta.toUpperCase();
-        this.ultimoComando = comandos.toUpperCase();
+        this.ultimoComando = comandos;
         this.erro = erro;
     }
     

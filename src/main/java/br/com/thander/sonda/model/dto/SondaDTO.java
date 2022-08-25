@@ -10,9 +10,6 @@ import javax.validation.constraints.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SondaDTO {
     
-    @NotBlank(message = "Planeta deve ser informado")
-    private String planeta;
-    
     @NotNull(message = "Posição inicial X deve ser informada")
     @Min(value = 0, message = "Posição inicial X deve ser entre 0 e 5")
     @Max(value = 5, message = "Posição inicial X deve ser entre 0 e 5")
@@ -26,6 +23,9 @@ public class SondaDTO {
     @NotBlank(message = "Direção inicial deve ser informada")
     @Pattern(regexp = "[ewnsEWNS]", message = "Valores aceitos para a direção inicial: E -> Leste, W -> Oeste, N -> Norte, S -> Sul")
     private String direcaoInical;
+    
+    @NotBlank(message = "Planeta deve ser informado")
+    private String planeta;
     
     @Size(max = 255, message = "Sequência de comandos deve conter um máximo de 255 caracteres")
     @Pattern(regexp = "[mrlMLR]*", message = "Valores aceitos para um comando: M -> Andar para a frente na direção que está 1 posição, " +
