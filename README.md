@@ -54,7 +54,7 @@ Parâmetros de Saída
 
 | Parâmetro   | Tipo       | Descrição                           |
 | :---------- | :--------- | :---------------------------------- |
-| `sondaId` | `Long` | Planeta de destino da Sonda|
+| `sondaId` | `Long` | ID da Sonda|
 | `inicialX` | `Integer` | Posição inicial X da Sonda|
 | `inicialY` | `Integer` | Posição inicial Y da Sonda|
 | `direcaoInical` | `String` | Direção inicial da Sonda|
@@ -73,9 +73,9 @@ Coordenadas - descrição
 | `x` | `Integer` | Posição X de uma coordenada|
 | `y` | `Integer` | Posição X de uma coordenada|
 | `direcao` | `String` | Direção de uma coordenada (E, W, N, S)|
-| `comandoExecutado` | `String` | Comando executado que direcionou a sonda para a coordenada|
+| `comandoExecutado` | `String` | Comando executado que direcionou a sonda para a coordenada (M, L, R)|
 
-#### Retorna uma Sonda
+#### Busca informações de uma Sonda
 
 ```http
   GET /sonda/${id}
@@ -89,7 +89,7 @@ Parâmetros de Saída
 
 | Parâmetro   | Tipo       | Descrição                           |
 | :---------- | :--------- | :---------------------------------- |
-| `sondaId` | `Long` | Planeta de destino da Sonda|
+| `sondaId` | `Long` | ID da Sonda|
 | `inicialX` | `Integer` | Posição inicial X da Sonda|
 | `inicialY` | `Integer` | Posição inicial Y da Sonda|
 | `direcaoInical` | `String` | Direção inicial da Sonda|
@@ -108,8 +108,38 @@ Coordenadas - descrição
 | `x` | `Integer` | Posição X de uma coordenada|
 | `y` | `Integer` | Posição X de uma coordenada|
 | `direcao` | `String` | Direção de uma coordenada (E, W, N, S)|
-| `comandoExecutado` | `String` | Comando executado que direcionou a sonda para a coordenada|
+| `comandoExecutado` | `String` | Comando executado que direcionou a sonda para a coordenada (M, L, R)|
 
+#### Lista informações de todas as Sondas
+
+```http
+  GET /sonda
+```
+
+Parâmetros de Saída: Uma lista dos parâmetros abaixo
+
+| Parâmetro   | Tipo       | Descrição                           |
+| :---------- | :--------- | :---------------------------------- |
+| `sondaId` | `Long` | ID da Sonda|
+| `inicialX` | `Integer` | Posição inicial X da Sonda|
+| `inicialY` | `Integer` | Posição inicial Y da Sonda|
+| `direcaoInical` | `String` | Direção inicial da Sonda|
+| `atualX` | `Integer` | Posição final X da Sonda|
+| `atualY` | `Integer` | Posição final Y da Sonda|
+| `direcaoAtual` | `String` | Direção final da Sonda|
+| `planeta` | `String` | Planeta de destino da Sonda|
+| `ultimoComando` | `String` | Sequência de comandos recebidos|
+| `coordenadas` | `Array` | Lista das coordenadas de pouso e movimentos da Sonda|
+| `erro` | `String` | Mensagem de erro caso não seja possível pousar ou mover uma sonda devido colisão com outra sonda|
+
+Coordenadas - descrição
+
+| Parâmetro   | Tipo       | Descrição                           |
+| :---------- | :--------- | :---------------------------------- |
+| `x` | `Integer` | Posição X de uma coordenada|
+| `y` | `Integer` | Posição X de uma coordenada|
+| `direcao` | `String` | Direção de uma coordenada (E, W, N, S)|
+| `comandoExecutado` | `String` | Comando executado que direcionou a sonda para a coordenada (M, L, R)|
 
 #### Movimenta uma Sonda existente
 
@@ -132,7 +162,7 @@ Parâmetros de Saída
 
 | Parâmetro   | Tipo       | Descrição                           |
 | :---------- | :--------- | :---------------------------------- |
-| `sondaId` | `Long` | Planeta de destino da Sonda|
+| `sondaId` | `Long` | ID da Sonda|
 | `inicialX` | `Integer` | Posição inicial X da Sonda|
 | `inicialY` | `Integer` | Posição inicial Y da Sonda|
 | `direcaoInical` | `String` | Direção inicial da Sonda|
@@ -151,4 +181,4 @@ Coordenadas - descrição
 | `x` | `Integer` | Posição X de uma coordenada|
 | `y` | `Integer` | Posição X de uma coordenada|
 | `direcao` | `String` | Direção de uma coordenada (E, W, N, S)|
-| `comandoExecutado` | `String` | Comando executado que direcionou a sonda para a coordenada|
+| `comandoExecutado` | `String` | Comando executado que direcionou a sonda para a coordenada (M, L, R)|
