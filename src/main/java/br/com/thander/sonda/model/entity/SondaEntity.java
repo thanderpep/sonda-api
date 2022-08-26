@@ -91,12 +91,11 @@ public class SondaEntity implements Serializable {
     }
     
     /***
-     * Converte um objeto SondaEntity para RetornoDTO com dados básicos de uma sonda que não foi possível pousar
-     * @param erro String com mensagem de erro
-     * @return RetornoDTO com dados de colisão de uma sonda ao pousar
+     * Converte um objeto SondaEntity para RetornoDTO com dados de uma sonda e seus movimentos
+     * @return RetornoDTO com dados de uma sonda e seus movimentos caso tenha
      */
-    public RetornoDTO converteParaRetornoColisaoPouso(String erro){
-        return new RetornoDTO(this.inicialX, this.inicialY, this.direcaoInical, this.planeta, this.ultimoComando, erro);
+    public RetornoDTO converteParaRetorno(){
+        return this.converteParaRetorno(null);
     }
     
     /***
@@ -105,23 +104,12 @@ public class SondaEntity implements Serializable {
      * @param erro String com mensagem de erro
      * @return RetornoDTO com dados de colisão de uma sonda ao movimentar para uma coordenada já ocupada
      */
-    public RetornoDTO converteParaRetornoColisaoMovimento(String erro){
-        List<CoordenadaDTO> coordenadaDTOList = coordenadas.stream()
-                .map(CoordenadaEntity::converteParaCoordenadaDTO).collect(Collectors.toList());
-        return new RetornoDTO(this.id, this.inicialX, this.inicialY, this.direcaoInical,
-                this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando,
-                coordenadaDTOList, erro);
-    }
-    
-    /***
-     * Converte um objeto SondaEntity para RetornoDTO com dados de uma sonda e seus movimentos
-     * @return RetornoDTO com dados de uma sonda e seus movimentos caso tenha
-     */
-    public RetornoDTO converteParaRetornoSucesso(){
+    public RetornoDTO converteParaRetorno(String erro){
         List<CoordenadaDTO> coordenadaDTOLista = coordenadas.stream()
                 .map(CoordenadaEntity::converteParaCoordenadaDTO).collect(Collectors.toList());
         return new RetornoDTO(this.id, this.inicialX, this.inicialY, this.direcaoInical,
-                this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando, coordenadaDTOLista);
+                this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando,
+                coordenadaDTOLista, erro);
     }
     
     /***
@@ -129,14 +117,24 @@ public class SondaEntity implements Serializable {
      * @param indexCoordenadas Index inical das coordenadas que deseja no retorno
      * @return RetornoDTO com dados de uma sonda e seus movimentos caso tenha
      */
-    public RetornoDTO converteParaRetornoSucessoPut(int indexCoordenadas) {
+    public RetornoDTO converteParaRetornoPut(int indexCoordenadas) {
+        return this.converteParaRetornoPut(indexCoordenadas, null);
+    }
+    
+    /***
+     * Converte um objeto SondaEntity para RetornoDTO com dados de uma sonda que colidiu
+     * com outra a se movimentar
+     * @param erro String com mensagem de erro
+     * @return RetornoDTO com dados de colisão de uma sonda ao movimentar para uma coordenada já ocupada
+     */
+    public RetornoDTO converteParaRetornoPut(int indexCoordenadas, String erro){
         CoordenadaEntity coordInicial = coordenadas.get(indexCoordenadas);
-        
+    
         List<CoordenadaDTO> coordenadaDTOLista = coordenadas.stream()
                 .map(CoordenadaEntity::converteParaCoordenadaDTO).collect(Collectors.toList())
                 .subList(++indexCoordenadas, coordenadas.size());
-        
+    
         return new RetornoDTO(this.id, coordInicial.getX(), coordInicial.getY(), coordInicial.getDirecao(),
-                this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando, coordenadaDTOLista);
+                this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando, coordenadaDTOLista, erro);
     }
 }

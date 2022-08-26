@@ -97,33 +97,45 @@ public class SondaEntityTest {
     }
     
     @Test
-    @DisplayName("Converte para retorno de uma sonda que tentou pousar em coordenada ja ocupada")
-    public void converteParaRetornoColisaoPouso() {
+    @DisplayName("Converte para retorno de uma sonda pousou e movimentou com sucesso")
+    public void converteParaRetornoSucesso() {
         SondaEntity sonda = mockSondaEntity();
-        RetornoDTO retornoDTO = sonda.converteParaRetornoColisaoPouso("Já existe sonda nessas coordenadas");
+        sonda.mover(COMANDO_MOVER);
+        sonda.mover(COMANDO_VIRAR_DIREITA);
+        sonda.mover(COMANDO_MOVER);
+        
+        RetornoDTO retornoDTO = sonda.converteParaRetorno();
         
         Assert.isTrue(sonda.getInicialX().equals(retornoDTO.getInicialX()));
         Assert.isTrue(sonda.getInicialY().equals(retornoDTO.getInicialY()));
         Assert.isTrue(sonda.getDirecaoInical().equals(retornoDTO.getDirecaoInical()));
+        Assert.isTrue(sonda.getAtualX().equals(retornoDTO.getAtualX()));
+        Assert.isTrue(sonda.getAtualY().equals(retornoDTO.getAtualY()));
+        Assert.isTrue(sonda.getDirecaoAtual().equals(retornoDTO.getDirecaoAtual()));
         Assert.isTrue(sonda.getPlaneta().equals(retornoDTO.getPlaneta()));
         
-        CoordenadaDTO coordenadaDTO = sonda.getCoordenadas().get(0).converteParaCoordenadaDTO();
+        for (int i = 0; i < retornoDTO.getCoordenadas().size(); i++) {
+            CoordenadaDTO coordenadaDTO = retornoDTO.getCoordenadas().get(i);
+            
+            Assert.isTrue(sonda.getCoordenadas().get(i).getX().equals(coordenadaDTO.getX()));
+            Assert.isTrue(sonda.getCoordenadas().get(i).getY().equals(coordenadaDTO.getY()));
+            Assert.isTrue(sonda.getCoordenadas().get(i).getDirecao().equals(coordenadaDTO.getDirecao()));
+            if (i == 0)
+                Assert.isNull(coordenadaDTO.getComandoExecutado());
+            else
+                Assert.isTrue(sonda.getCoordenadas().get(i).getComando().equals(coordenadaDTO.getComandoExecutado()));
+        }
         
-        Assert.isTrue(sonda.getCoordenadas().get(0).getX().equals(coordenadaDTO.getX()));
-        Assert.isTrue(sonda.getCoordenadas().get(0).getY().equals(coordenadaDTO.getY()));
-        Assert.isTrue(sonda.getCoordenadas().get(0).getDirecao().equals(coordenadaDTO.getDirecao()));
-        Assert.isNull(coordenadaDTO.getComandoExecutado());
-        
-        Assert.isTrue(retornoDTO.getErro().equals("Já existe sonda nessas coordenadas"));
+        Assert.isNull(retornoDTO.getErro());
     }
     
     @Test
-    @DisplayName("Converte para retorno de uma sonda que tentou se mover para coordenada ja ocupada")
-    public void converteParaRetornoColisaoMovimento() {
+    @DisplayName("Converte para retorno de uma sonda que pousou e tentou se mover para coordenada ja ocupada")
+    public void converteParaRetornoComColisaoMovimento() {
         SondaEntity sonda = mockSondaEntity();
         sonda.mover(COMANDO_MOVER);
         
-        RetornoDTO retornoDTO = sonda.converteParaRetornoColisaoMovimento("Já existe sonda nessas coordenadas");
+        RetornoDTO retornoDTO = sonda.converteParaRetorno("Já existe sonda nessas coordenadas");
         
         Assert.isTrue(sonda.getInicialX().equals(retornoDTO.getInicialX()));
         Assert.isTrue(sonda.getInicialY().equals(retornoDTO.getInicialY()));
@@ -149,54 +161,14 @@ public class SondaEntityTest {
     }
     
     @Test
-    @DisplayName("Converte para retorno de uma sonda pousou e movimentou com sucesso")
-    public void converteParaRetornoSucesso() {
-        SondaEntity sonda = mockSondaEntity();
-        sonda.mover(COMANDO_MOVER);
-        sonda.mover(COMANDO_VIRAR_DIREITA);
-        sonda.mover(COMANDO_MOVER);
-        
-        RetornoDTO retornoDTO = sonda.converteParaRetornoSucesso();
-    
-        Assert.isTrue(sonda.getInicialX().equals(retornoDTO.getInicialX()));
-        Assert.isTrue(sonda.getInicialY().equals(retornoDTO.getInicialY()));
-        Assert.isTrue(sonda.getDirecaoInical().equals(retornoDTO.getDirecaoInical()));
-        Assert.isTrue(sonda.getAtualX().equals(retornoDTO.getAtualX()));
-        Assert.isTrue(sonda.getAtualY().equals(retornoDTO.getAtualY()));
-        Assert.isTrue(sonda.getDirecaoAtual().equals(retornoDTO.getDirecaoAtual()));
-        Assert.isTrue(sonda.getPlaneta().equals(retornoDTO.getPlaneta()));
-    
-        for (int i = 0; i < retornoDTO.getCoordenadas().size(); i++) {
-            CoordenadaDTO coordenadaDTO = retornoDTO.getCoordenadas().get(i);
-        
-            Assert.isTrue(sonda.getCoordenadas().get(i).getX().equals(coordenadaDTO.getX()));
-            Assert.isTrue(sonda.getCoordenadas().get(i).getY().equals(coordenadaDTO.getY()));
-            Assert.isTrue(sonda.getCoordenadas().get(i).getDirecao().equals(coordenadaDTO.getDirecao()));
-            if (i == 0)
-                Assert.isNull(coordenadaDTO.getComandoExecutado());
-            else
-                Assert.isTrue(sonda.getCoordenadas().get(i).getComando().equals(coordenadaDTO.getComandoExecutado()));
-        }
-    
-        Assert.isNull(retornoDTO.getErro());
-    }
-    
-    @Test
+    @DisplayName("Converte para retorno de uma sonda existente que movimentou com sucesso")
     public void ConverteParaRetornoSucessoAlteracao() {
-        SondaEntity sonda = mockSondaEntity();
-        sonda.mover(COMANDO_MOVER);
-        sonda.mover(COMANDO_VIRAR_DIREITA);
-    
-        RetornoDTO retornoDTO = sonda.converteParaRetornoSucesso();
-        
-        Assert.isTrue(retornoDTO.getCoordenadas().size()==3);
-        Assert.isNull(retornoDTO.getErro());
-        
+        SondaEntity sonda = mockSondaEntityVariasCoordenadas();
         int index = sonda.getCoordenadas().indexOf(sonda.coordenadaAtual());
         sonda.mover(COMANDO_MOVER);
         sonda.mover(COMANDO_MOVER);
-        
-        retornoDTO = sonda.converteParaRetornoSucessoPut(index);
+    
+        RetornoDTO retornoDTO = sonda.converteParaRetornoPut(index);
     
         Assert.isTrue(sonda.getCoordenadas().get(index).getX().equals(retornoDTO.getInicialX()));
         Assert.isTrue(sonda.getCoordenadas().get(index).getY().equals(retornoDTO.getInicialY()));
@@ -218,6 +190,36 @@ public class SondaEntityTest {
         Assert.isTrue(sonda.getCoordenadas().size() == 5);
         Assert.isTrue(retornoDTO.getCoordenadas().size() == 2);
         Assert.isNull(retornoDTO.getErro());
+    }
+    
+    @Test
+    @DisplayName("Converte para retorno de uma sonda existente que tentou se mover para coordenada ja ocupada")
+    public void converteParaRetornoComColisaoMovimentoAlteracao() {
+        SondaEntity sonda = mockSondaEntityVariasCoordenadas();
+        int index = sonda.getCoordenadas().indexOf(sonda.coordenadaAtual());
+        sonda.mover(COMANDO_MOVER);
+        sonda.mover(COMANDO_MOVER);
+        
+        RetornoDTO retornoDTO = sonda.converteParaRetornoPut(index, "Já existe sonda nessas coordenadas");
+        
+        Assert.isTrue(sonda.getCoordenadas().get(index).getX().equals(retornoDTO.getInicialX()));
+        Assert.isTrue(sonda.getCoordenadas().get(index).getY().equals(retornoDTO.getInicialY()));
+        Assert.isTrue(sonda.getCoordenadas().get(index).getDirecao().equals(retornoDTO.getDirecaoInical()));
+        Assert.isTrue(sonda.getAtualX().equals(retornoDTO.getAtualX()));
+        Assert.isTrue(sonda.getAtualY().equals(retornoDTO.getAtualY()));
+        Assert.isTrue(sonda.getDirecaoAtual().equals(retornoDTO.getDirecaoAtual()));
+        Assert.isTrue(sonda.getPlaneta().equals(retornoDTO.getPlaneta()));
+        
+        for (int i = 1; i < retornoDTO.getCoordenadas().size(); i++) {
+            CoordenadaDTO coordenadaDTO = retornoDTO.getCoordenadas().get(i-1);
+            
+            Assert.isTrue(sonda.getCoordenadas().get(index + i).getX().equals(coordenadaDTO.getX()));
+            Assert.isTrue(sonda.getCoordenadas().get(index + i).getY().equals(coordenadaDTO.getY()));
+            Assert.isTrue(sonda.getCoordenadas().get(index + i).getDirecao().equals(coordenadaDTO.getDirecao()));
+            Assert.isTrue(sonda.getCoordenadas().get(index + i).getComando().equals(coordenadaDTO.getComandoExecutado()));
+        }
+    
+        Assert.isTrue(retornoDTO.getErro().equals("Já existe sonda nessas coordenadas"));
     }
     
     private SondaEntity mockSondaEntity() {

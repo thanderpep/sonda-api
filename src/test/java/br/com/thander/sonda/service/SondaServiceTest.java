@@ -1,6 +1,7 @@
 package br.com.thander.sonda.service;
 
 import br.com.thander.sonda.ApplicationTestConfig;
+import br.com.thander.sonda.exception.ColisaoException;
 import br.com.thander.sonda.model.dto.ComandoDTO;
 import br.com.thander.sonda.model.dto.RetornoDTO;
 import br.com.thander.sonda.model.dto.SondaDTO;
@@ -32,7 +33,7 @@ public class SondaServiceTest extends ApplicationTestConfig {
     
     @Test
     @DisplayName("Cria uma sonda com sucesso sem enviar comando de movimento")
-    public void criaSondaSemComando() {
+    public void criaSondaSemComando() throws ColisaoException {
         SondaDTO sondaDTO = mockSondaDTOSemComando();
         SondaEntity sondaEntity = mock(SondaEntity.class);
         when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.empty());
@@ -45,7 +46,7 @@ public class SondaServiceTest extends ApplicationTestConfig {
     
     @Test
     @DisplayName("Cria uma sonda com sucesso enviando comando de movimento")
-    public void criaSondaComComando() {
+    public void criaSondaComComando() throws ColisaoException {
         SondaDTO sondaDTO = mockSondaDTOComComando();
         SondaEntity sondaEntity = mock(SondaEntity.class);
         when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.empty());
@@ -62,15 +63,18 @@ public class SondaServiceTest extends ApplicationTestConfig {
         SondaDTO sondaDTO = mockSondaDTOComComando();
         SondaEntity sondaEntity = mock(SondaEntity.class);
         when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.of(sondaEntity));
-        RetornoDTO retornoDTO = sondaService.criaSonda(sondaDTO);
+        try {
+            sondaService.criaSonda(sondaDTO);
+        } catch (Exception ex) {
+            Assert.isTrue(ex instanceof ColisaoException);
+            Assert.isTrue(ex.getMessage().equals("As coordenadas x=3, y=3 já estão ocupadas por outra sonda."));
+        }
         verify(sondaRepository, times(0)).saveAndFlush(sondaEntity);
-        Assert.isTrue(retornoDTO.getErro().equals("As coordenadas x=3, y=3 já estão ocupadas por outra sonda. " +
-                "Não é possível pousar neste ponto."));
     }
     
     @Test
     @DisplayName("Criar uma sonda e tenta mover para uma coordenada já ocupada")
-    public void criaSondaTentaMoverCoordenadaOcupada() {
+    public void criaSondaTentaMoverCoordenadaOcupada() throws ColisaoException {
         SondaDTO sondaDTO = mockSondaDTOComComando();
         SondaEntity sondaEntity = mock(SondaEntity.class);
         when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.empty(), Optional.of(sondaEntity));

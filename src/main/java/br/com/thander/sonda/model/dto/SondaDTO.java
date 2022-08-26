@@ -21,14 +21,14 @@ public class SondaDTO {
     private Integer inicialY;
     
     @NotBlank(message = "Direção inicial deve ser informada")
-    @Pattern(regexp = "[ewnsEWNS]", message = "Valores aceitos para a direção inicial: E -> Leste, W -> Oeste, N -> Norte, S -> Sul")
+    @Pattern(regexp = "[EWNS]", message = "Valores aceitos para a direção inicial: E -> Leste, W -> Oeste, N -> Norte, S -> Sul")
     private String direcaoInical;
     
     @NotBlank(message = "Planeta deve ser informado")
     private String planeta;
     
     @Size(max = 255, message = "Sequência de comandos deve conter um máximo de 255 caracteres")
-    @Pattern(regexp = "[mrlMLR]*", message = "Valores aceitos para um comando: M -> Andar para a frente na direção que está 1 posição, " +
+    @Pattern(regexp = "[MLR]*", message = "Valores aceitos para um comando: M -> Andar para a frente na direção que está 1 posição, " +
             "L -> Virar a sonda para a esquerda (90 graus), R -> Virar a sonda para a direita (90 graus)")
     private String comandos;
     

@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -26,15 +28,15 @@ public class SondaService {
      * @param sondaDTO
      * @return RetornoDTO com as informações da sonda e as coordenadas de todos os movimentos realizados por ela
      */
-    public RetornoDTO criaSonda(SondaDTO sondaDTO) {
+    public RetornoDTO criaSonda(SondaDTO sondaDTO) throws ColisaoException {
         SondaEntity sondaEntity = sondaDTO.converteParaSondaEntity();
         
         // Verifica se existe sonda parada na coordenada de pouso
-        try {
+//        try {
             verificaColisaoSonda(sondaEntity.coordenadaAtual());
-        } catch (ColisaoException ex) {
-            return sondaEntity.converteParaRetornoColisaoPouso(ex.getMessage() + " Não é possível pousar neste ponto.");
-        }
+//        } catch (ColisaoException ex) {
+//            return sondaEntity.converteParaRetornoColisaoPouso(ex.getMessage() + " Não é possível pousar neste ponto.");
+//        }
         
         // Salva no banco de dados o estado inicial da sonda
         sondaRepository.saveAndFlush(sondaEntity);
@@ -43,11 +45,11 @@ public class SondaService {
         try {
             executaComandos(sondaEntity, sondaDTO.getComandos());
             log.info(String.format("Posição final da sonda %d: %s", sondaEntity.getId(), sondaEntity.coordenadaAtual()));
-            return sondaEntity.converteParaRetornoSucesso();
+            return sondaEntity.converteParaRetorno();
         } catch (ColisaoException ex) {
             String erro = String.format("%s Não é possível mover para este ponto. A sonda %d ficou parada nas " +
                     "coordenadas %s", ex.getMessage(), sondaEntity.getId(), sondaEntity.coordenadaAtual());
-            return sondaEntity.converteParaRetornoColisaoMovimento(erro);
+            return sondaEntity.converteParaRetorno(erro);
         }
     }
     
@@ -89,14 +91,23 @@ public class SondaService {
     }
     
     /***
-     * Busca as informações atuais da sonda
+     * Busca as informações atuais de uma sonda específica
      * @param sondaId
      * @return RetornoDTO com as informações da sonda e as coordenadas de todos os movimentos realizados por ela
      */
     public RetornoDTO buscaSondaPorId(Long sondaId) {
         return sondaRepository.findById(sondaId)
-                .map(sonda -> sonda.converteParaRetornoSucesso())
+                .map(sonda -> sonda.converteParaRetorno())
                 .orElseThrow(() -> new EntityNotFoundException("Sonda não encontrada"));
+    }
+    
+    /***
+     * Busca as informações atuais de todas as sondas
+     * @return RetornoDTO com as informações das sondas e as coordenadas de todos os movimentos realizados por elas
+     */
+    public List<RetornoDTO> buscaTodasSondas() {
+        return sondaRepository.findAll()
+                .stream().map(sonda -> sonda.converteParaRetorno()).collect(Collectors.toList());
     }
     
     /***
@@ -109,16 +120,16 @@ public class SondaService {
     public RetornoDTO movimentaSondaPorId(Long sondaId, ComandoDTO comandos) {
         return sondaRepository.findById(sondaId)
                 .map(sonda -> {
+                    int index = sonda.getCoordenadas().indexOf(sonda.coordenadaAtual());
                     try {
                         log.info(String.format("Posição atual da sonda %d: %s", sonda.getId(), sonda.coordenadaAtual()));
-                        int index = sonda.getCoordenadas().indexOf(sonda.coordenadaAtual());
                         executaComandos(sonda, comandos.getComandos());
                         log.info(String.format("Posição final da sonda %d: %s", sonda.getId(), sonda.coordenadaAtual()));
-                        return sonda.converteParaRetornoSucessoPut(index);
+                        return sonda.converteParaRetornoPut(index);
                     } catch (ColisaoException ex) {
                         String erro = String.format("%s Não é possível mover para este ponto. A sonda %d ficou parada nas coordenadas %s",
                                 ex.getMessage(), sonda.getId(), sonda.coordenadaAtual());
-                        return sonda.converteParaRetornoColisaoMovimento(erro);
+                        return sonda.converteParaRetornoPut(index, erro);
                     }
                 }).orElseThrow(() -> new EntityNotFoundException("Sonda não encontrada"));
     }

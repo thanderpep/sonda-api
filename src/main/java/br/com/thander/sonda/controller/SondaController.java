@@ -1,19 +1,17 @@
 package br.com.thander.sonda.controller;
 
+import br.com.thander.sonda.exception.ColisaoException;
 import br.com.thander.sonda.model.dto.ComandoDTO;
 import br.com.thander.sonda.model.dto.RetornoDTO;
 import br.com.thander.sonda.model.dto.SondaDTO;
 import br.com.thander.sonda.service.SondaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Validated
 @RestController
 @RequestMapping("/sonda")
 public class SondaController {
@@ -23,8 +21,8 @@ public class SondaController {
     
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public List<RetornoDTO> criaSondas(@RequestBody @Valid List<SondaDTO> sondaDTOLista) {
-        return sondaDTOLista.stream().map(sonda -> sondaService.criaSonda(sonda)).collect(Collectors.toList());
+    public RetornoDTO criaSonda(@RequestBody @Valid SondaDTO sondaDTO) throws ColisaoException {
+        return sondaService.criaSonda(sondaDTO);
     }
     
     @GetMapping("/{id}")
@@ -32,6 +30,13 @@ public class SondaController {
     public RetornoDTO buscaSonda(@PathVariable("id") Long sondaId) {
         return sondaService.buscaSondaPorId(sondaId);
     }
+    
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<RetornoDTO> buscaTodasSondas() {
+        return sondaService.buscaTodasSondas();
+    }
+    
     
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)

@@ -23,7 +23,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         
         if (ex instanceof EntityNotFoundException) {
             httpStatus = HttpStatus.NOT_FOUND;
-        } else if (ex instanceof ConstraintViolationException) {
+        } else if (ex instanceof ConstraintViolationException || ex instanceof ColisaoException) {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
     
