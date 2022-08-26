@@ -1,6 +1,7 @@
 package br.com.thander.sonda.service;
 
 import br.com.thander.sonda.exception.ColisaoException;
+import br.com.thander.sonda.model.dto.ComandoDTO;
 import br.com.thander.sonda.model.dto.RetornoDTO;
 import br.com.thander.sonda.model.dto.SondaDTO;
 import br.com.thander.sonda.model.entity.CoordenadaEntity;
@@ -30,7 +31,7 @@ public class SondaService {
         
         // Verifica se existe sonda parada na coordenada de pouso
         try {
-            verificaColisao(sondaEntity.coordenadaAtual());
+            verificaColisaoSonda(sondaEntity.coordenadaAtual());
         } catch (ColisaoException ex) {
             return sondaEntity.converteParaRetornoColisaoPouso(ex.getMessage() + " Não é possível pousar neste ponto.");
         }
@@ -55,10 +56,10 @@ public class SondaService {
      * @param coordenada
      * @throws ColisaoException
      */
-    private void verificaColisao(CoordenadaEntity coordenada) throws ColisaoException {
+    private void verificaColisaoSonda(CoordenadaEntity coordenada) throws ColisaoException {
         Optional<SondaEntity> sonda = sondaRepository.findByPlanetaAndAtualXAndAtualY(
                 coordenada.getSonda().getPlaneta(), coordenada.getX(), coordenada.getY());
-        if (sonda.isPresent()) {
+        if (sonda.isPresent() && sonda.get().getId() != coordenada.getSonda().getId()) {
             throw new ColisaoException(coordenada);
         }
     }
@@ -77,7 +78,7 @@ public class SondaService {
             // itera os comandos para movimentar a sonda
             for (char comando : comandos.toCharArray()) {
                 CoordenadaEntity proxCoordenada = sondaEntity.coordenadaAtual().calculaProximaCoordenada(comando);
-                verificaColisao(proxCoordenada);
+                verificaColisaoSonda(proxCoordenada);
                 sondaEntity.mover(comando);
                 sondaRepository.saveAndFlush(sondaEntity);
             }
@@ -105,13 +106,15 @@ public class SondaService {
      * @return RetornoDTO com as informações da sonda e as coordenadas dos movimentos realizados pela sequencia
      * de comandos recebida
      */
-    public RetornoDTO movimentaSondaPorId(Long sondaId, String comandos) {
+    public RetornoDTO movimentaSondaPorId(Long sondaId, ComandoDTO comandos) {
         return sondaRepository.findById(sondaId)
                 .map(sonda -> {
                     try {
-                        int index = sonda.getCoordenadas().size();
-                        executaComandos(sonda, comandos);
-                        return sonda.converteParaRetornoSucesso(index);
+                        log.info(String.format("Posição atual da sonda %d: %s", sonda.getId(), sonda.coordenadaAtual()));
+                        int index = sonda.getCoordenadas().indexOf(sonda.coordenadaAtual());
+                        executaComandos(sonda, comandos.getComandos());
+                        log.info(String.format("Posição final da sonda %d: %s", sonda.getId(), sonda.coordenadaAtual()));
+                        return sonda.converteParaRetornoSucessoPut(index);
                     } catch (ColisaoException ex) {
                         String erro = String.format("%s Não é possível mover para este ponto. A sonda %d ficou parada nas coordenadas %s",
                                 ex.getMessage(), sonda.getId(), sonda.coordenadaAtual());

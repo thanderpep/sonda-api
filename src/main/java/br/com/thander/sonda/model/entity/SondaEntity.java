@@ -118,19 +118,25 @@ public class SondaEntity implements Serializable {
      * @return RetornoDTO com dados de uma sonda e seus movimentos caso tenha
      */
     public RetornoDTO converteParaRetornoSucesso(){
-        return this.converteParaRetornoSucesso(0);
+        List<CoordenadaDTO> coordenadaDTOLista = coordenadas.stream()
+                .map(CoordenadaEntity::converteParaCoordenadaDTO).collect(Collectors.toList());
+        return new RetornoDTO(this.id, this.inicialX, this.inicialY, this.direcaoInical,
+                this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando, coordenadaDTOLista);
     }
     
     /***
      * Converte um objeto SondaEntity para RetornoDTO com dados de uma sonda e seus movimentos
-     * @param index Index inical das coordenadas que deseja no retorno
+     * @param indexCoordenadas Index inical das coordenadas que deseja no retorno
      * @return RetornoDTO com dados de uma sonda e seus movimentos caso tenha
      */
-    public RetornoDTO converteParaRetornoSucesso(int index){
+    public RetornoDTO converteParaRetornoSucessoPut(int indexCoordenadas) {
+        CoordenadaEntity coordInicial = coordenadas.get(indexCoordenadas);
+        
         List<CoordenadaDTO> coordenadaDTOLista = coordenadas.stream()
                 .map(CoordenadaEntity::converteParaCoordenadaDTO).collect(Collectors.toList())
-                .subList(index, coordenadas.size());
-        return new RetornoDTO(this.id, coordenadaDTOLista.get(0).getX(), coordenadaDTOLista.get(0).getY(),
-                coordenadaDTOLista.get(0).getDirecao(), this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando, coordenadaDTOLista);
+                .subList(++indexCoordenadas, coordenadas.size());
+        
+        return new RetornoDTO(this.id, coordInicial.getX(), coordInicial.getY(), coordInicial.getDirecao(),
+                this.atualX, this.atualY, this.direcaoAtual, this.planeta, this.ultimoComando, coordenadaDTOLista);
     }
 }

@@ -192,11 +192,11 @@ public class SondaEntityTest {
         Assert.isTrue(retornoDTO.getCoordenadas().size()==3);
         Assert.isNull(retornoDTO.getErro());
         
-        int index = sonda.getCoordenadas().size();
+        int index = sonda.getCoordenadas().indexOf(sonda.coordenadaAtual());
         sonda.mover(COMANDO_MOVER);
         sonda.mover(COMANDO_MOVER);
         
-        retornoDTO = sonda.converteParaRetornoSucesso(index);
+        retornoDTO = sonda.converteParaRetornoSucessoPut(index);
     
         Assert.isTrue(sonda.getCoordenadas().get(index).getX().equals(retornoDTO.getInicialX()));
         Assert.isTrue(sonda.getCoordenadas().get(index).getY().equals(retornoDTO.getInicialY()));
@@ -206,8 +206,8 @@ public class SondaEntityTest {
         Assert.isTrue(sonda.getDirecaoAtual().equals(retornoDTO.getDirecaoAtual()));
         Assert.isTrue(sonda.getPlaneta().equals(retornoDTO.getPlaneta()));
     
-        for (int i = 0; i < retornoDTO.getCoordenadas().size(); i++) {
-            CoordenadaDTO coordenadaDTO = retornoDTO.getCoordenadas().get(i);
+        for (int i = 1; i < retornoDTO.getCoordenadas().size(); i++) {
+            CoordenadaDTO coordenadaDTO = retornoDTO.getCoordenadas().get(i-1);
         
             Assert.isTrue(sonda.getCoordenadas().get(index + i).getX().equals(coordenadaDTO.getX()));
             Assert.isTrue(sonda.getCoordenadas().get(index + i).getY().equals(coordenadaDTO.getY()));

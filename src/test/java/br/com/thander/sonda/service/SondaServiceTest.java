@@ -1,6 +1,7 @@
 package br.com.thander.sonda.service;
 
 import br.com.thander.sonda.ApplicationTestConfig;
+import br.com.thander.sonda.model.dto.ComandoDTO;
 import br.com.thander.sonda.model.dto.RetornoDTO;
 import br.com.thander.sonda.model.dto.SondaDTO;
 import br.com.thander.sonda.model.entity.CoordenadaEntity;
@@ -109,7 +110,7 @@ public class SondaServiceTest extends ApplicationTestConfig {
     @DisplayName("Busca uma sonda por Id e movimenta através de comandos")
     public void movimentaSondaPorId() {
         SondaEntity sondaEntity = mockSondaEntity();
-        String comandos = "LMLMLMM";
+        ComandoDTO comandos = mockComandoDTO();
         when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.empty());
         when(sondaRepository.saveAndFlush(sondaEntity)).thenReturn(sondaEntity);
         when(sondaRepository.findById(sondaEntity.getId())).thenReturn(Optional.of(sondaEntity));
@@ -119,7 +120,7 @@ public class SondaServiceTest extends ApplicationTestConfig {
         Assert.isTrue(retornoDTO.getAtualX().equals(1));
         Assert.isTrue(retornoDTO.getAtualY().equals(3));
         Assert.isTrue(retornoDTO.getDirecaoAtual().equals("N"));
-        Assert.isTrue(retornoDTO.getCoordenadas().size() == comandos.length());
+        Assert.isTrue(retornoDTO.getCoordenadas().size() == comandos.getComandos().length());
     }
     
     @Test
@@ -127,7 +128,7 @@ public class SondaServiceTest extends ApplicationTestConfig {
     public void buscaSondaTentaMoverCoordenadaOcupada() {
         SondaEntity sondaEntity1 = mockSondaEntity();
         SondaEntity sondaEntity2 = mock(SondaEntity.class);
-        String comandos = "LMLMLMM";
+        ComandoDTO comandos = mockComandoDTO();
         when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.empty(), Optional.of(sondaEntity2));
         when(sondaRepository.saveAndFlush(sondaEntity1)).thenReturn(sondaEntity1);
         when(sondaRepository.findById(sondaEntity1.getId())).thenReturn(Optional.of(sondaEntity1));
@@ -141,7 +142,7 @@ public class SondaServiceTest extends ApplicationTestConfig {
     @Test
     @DisplayName("Tenta mover uma sonda com Id não encontrado")
     public void movimentaSondaPorIdNaoExistente() {
-        String comandos = "LMLMLMM";
+        ComandoDTO comandos = mockComandoDTO();
         when(sondaRepository.findById(any())).thenReturn(Optional.empty());
         try {
             sondaService.movimentaSondaPorId(2L, comandos);
@@ -180,5 +181,11 @@ public class SondaServiceTest extends ApplicationTestConfig {
         sonda.setInicialX(3);
         sonda.setInicialY(3);
         return sonda;
+    }
+    
+    private ComandoDTO mockComandoDTO(){
+        ComandoDTO comando = new ComandoDTO();
+        comando.setComandos("LMLMLMM");
+        return comando;
     }
 }

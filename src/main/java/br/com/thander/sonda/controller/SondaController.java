@@ -1,5 +1,6 @@
 package br.com.thander.sonda.controller;
 
+import br.com.thander.sonda.model.dto.ComandoDTO;
 import br.com.thander.sonda.model.dto.RetornoDTO;
 import br.com.thander.sonda.model.dto.SondaDTO;
 import br.com.thander.sonda.service.SondaService;
@@ -34,7 +35,7 @@ public class SondaController {
     
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public RetornoDTO movimentaSonda(@PathVariable("id") Long sondaId, @RequestParam String comandos) {
-        return sondaService.movimentaSondaPorId(sondaId, comandos);
+    public RetornoDTO movimentaSonda(@PathVariable("id") Long sondaId, @RequestBody @Valid ComandoDTO comandoDTO) {
+        return sondaService.movimentaSondaPorId(sondaId, comandoDTO);
     }
 }
