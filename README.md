@@ -26,9 +26,10 @@ A orientação da sonda dentro do plano cartesiano usa uma rosa dos ventos como 
 ![rosa dos ventos](http://i.imgur.com/li8Ae5L.png "Rosa dos Ventos")
 
 #### Adicionais implementados:
-Foi implementado um sistema de colisão que verifica se o ponto em que a sonda irá pousar ou se mover está ocupado por outra sonda.
+Foi implementado um sistema de colisão que verifica se o ponto em que a sonda irá pousar ou se mover está ocupado por outra sonda ou fora dos limites do terreno.
 - `Colisão no pouso`: na tentativa de pouso (criação) de uma nova sonda, é verificado previamente se o ponto de pouso está ocupado por outra sonda, caso positivo, a sonda não será salva na base de dados e uma mensagem informativa será retornada.
-- `Colisão no movimento`: no movimento de uma sonda, é verificado previamente se o ponto de destino está ocupado por outra sonda, caso positivo, a sonda que está se movimentando ficará parada no ponto percorrido até o momento e uma mensagem informativa será retornada junto às informações de saída de dados que conterão as coordenadas atuais da sonda.
+- `Colisão no movimento`: no movimento de uma sonda, é verificado previamente se o ponto de destino está ocupado por outra sonda, caso positivo, a sonda que está se movendo ficará parada no ponto percorrido até o momento e uma mensagem informativa será retornada junto às informações de saída de dados que conterão as coordenadas atuais da sonda.
+- `Movimento para fora dos limites`: no movimento de uma sonda, é verificado previamente se o ponto de destino está fora dos limites do terreno (5x5), caso positivo, a sonda que está se movendo ficará parada no ponto percorrido até o momento e uma mensagem informativa será retornada junto às informações de saída de dados que conterão as coordenadas atuais da sonda.
 ##
 
 
@@ -45,10 +46,10 @@ Parâmetros de entrada
 | Parâmetro   | Tipo       | Descrição                           |
 | :---------- | :--------- | :---------------------------------- |
 | `planeta` | `String` | **Obrigatório**. Planeta de destino da Sonda|
-| `inicialX` | `Integer` | **Obrigatório**. Posição inicial X da Sonda|
-| `inicialY` | `Integer` | **Obrigatório**. Posição inicial Y da Sonda|
+| `inicialX` | `Integer` | **Obrigatório**. Posição inicial X da Sonda (0 a 5)|
+| `inicialY` | `Integer` | **Obrigatório**. Posição inicial Y da Sonda (0 a 5)|
 | `direcaoInical` | `String` | **Obrigatório**. Direção inicial da Sonda (E = Leste, W = Oeste, N = Norte, S = Sul)|
-| `comandos` | `String` | **Opcional**. Sequência de comandos para movimentar a Sonda assim que pousar (M = Mover, L = Gira 90 graus para esquerda, R = Gira 90 graus para direita)|
+| `comandos` | `String` | **Opcional**. Sequência de comandos para movimentar a Sonda assim que pousar (máx. 255 caracteres -> M = Mover, L = Gira 90 graus para esquerda, R = Gira 90 graus para direita)|
 
 Parâmetros de Saída
 
@@ -62,8 +63,8 @@ Parâmetros de Saída
 | `atualY` | `Integer` | Posição final Y da Sonda|
 | `direcaoAtual` | `String` | Direção final da Sonda|
 | `planeta` | `String` | Planeta de destino da Sonda|
-| `ultimoComando` | `String` | Sequência de comandos recebidos|
-| `coordenadas` | `Array` | Lista das coordenadas de pouso e movimentos da Sonda|
+| `ultimoComando` | `String` | Última sequência de comandos recebida|
+| `coordenadas` | `Array` | Lista das coordenadas de pouso e todos os movimentos da Sonda|
 | `erro` | `String` | Mensagem de erro caso não seja possível pousar ou mover uma sonda devido colisão com outra sonda|
 
 Coordenadas - descrição
@@ -97,8 +98,8 @@ Parâmetros de Saída
 | `atualY` | `Integer` | Posição final Y da Sonda|
 | `direcaoAtual` | `String` | Direção final da Sonda|
 | `planeta` | `String` | Planeta de destino da Sonda|
-| `ultimoComando` | `String` | Sequência de comandos recebidos|
-| `coordenadas` | `Array` | Lista das coordenadas de pouso e movimentos da Sonda|
+| `ultimoComando` | `String` | Última sequência de comandos recebida|
+| `coordenadas` | `Array` | Lista das coordenadas de pouso e todos os movimentos da Sonda|
 | `erro` | `String` | Mensagem de erro caso não seja possível pousar ou mover uma sonda devido colisão com outra sonda|
 
 Coordenadas - descrição
@@ -128,8 +129,8 @@ Parâmetros de Saída: Uma lista dos parâmetros abaixo
 | `atualY` | `Integer` | Posição final Y da Sonda|
 | `direcaoAtual` | `String` | Direção final da Sonda|
 | `planeta` | `String` | Planeta de destino da Sonda|
-| `ultimoComando` | `String` | Sequência de comandos recebidos|
-| `coordenadas` | `Array` | Lista das coordenadas de pouso e movimentos da Sonda|
+| `ultimoComando` | `String` | Última sequência de comandos recebida|
+| `coordenadas` | `Array` | Lista das coordenadas de pouso e todos os movimentos da Sonda|
 | `erro` | `String` | Mensagem de erro caso não seja possível pousar ou mover uma sonda devido colisão com outra sonda|
 
 Coordenadas - descrição
@@ -149,13 +150,13 @@ Coordenadas - descrição
 
 | Parâmetro   | Tipo       | Descrição                                   |
 | :---------- | :--------- | :------------------------------------------ |
-| `id`      | `Long` | **Obrigatório**. O ID da Sonda que deseja obter as informações|
+| `id`      | `Long` | **Obrigatório**. O ID da Sonda que deseja movimentar|
 
 Parâmetros de entrada
 
 | Parâmetro   | Tipo       | Descrição                                   |
 | :---------- | :--------- | :------------------------------------------ |
-| `comandos`      | `String` | **Obrigatório**. Sequência de comandos para movimentar a Sonda assim que pousar (M = Mover, L = Gira 90 graus para esquerda, R = Gira 90 graus para direita)|
+| `comandos`      | `String` | **Obrigatório**. Sequência de comandos para movimentar a Sonda assim que pousar (máx. 255 caracteres -> M = Mover, L = Gira 90 graus para esquerda, R = Gira 90 graus para direita)|
 
 
 Parâmetros de Saída
@@ -170,8 +171,8 @@ Parâmetros de Saída
 | `atualY` | `Integer` | Posição final Y da Sonda|
 | `direcaoAtual` | `String` | Direção final da Sonda|
 | `planeta` | `String` | Planeta de destino da Sonda|
-| `ultimoComando` | `String` | Sequência de comandos recebidos|
-| `coordenadas` | `Array` | Lista das coordenadas de pouso e movimentos da Sonda|
+| `ultimoComando` | `String` | Última sequência de comandos recebida|
+| `coordenadas` | `Array` | Lista das coordenadas dos movimentos realizados somente da sequência de comandos recebida|
 | `erro` | `String` | Mensagem de erro caso não seja possível pousar ou mover uma sonda devido colisão com outra sonda|
 
 Coordenadas - descrição

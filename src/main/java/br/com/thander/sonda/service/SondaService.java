@@ -1,6 +1,7 @@
 package br.com.thander.sonda.service;
 
 import br.com.thander.sonda.exception.ColisaoException;
+import br.com.thander.sonda.exception.LimiteTerrenoException;
 import br.com.thander.sonda.model.dto.ComandoDTO;
 import br.com.thander.sonda.model.dto.RetornoDTO;
 import br.com.thander.sonda.model.dto.SondaDTO;
@@ -46,7 +47,7 @@ public class SondaService {
             executaComandos(sondaEntity, sondaDTO.getComandos());
             log.info(String.format("Posição final da sonda %d: %s", sondaEntity.getId(), sondaEntity.coordenadaAtual()));
             return sondaEntity.converteParaRetorno();
-        } catch (ColisaoException ex) {
+        } catch (ColisaoException | LimiteTerrenoException ex) {
             String erro = String.format("%s Não é possível mover para este ponto. A sonda %d ficou parada nas " +
                     "coordenadas %s", ex.getMessage(), sondaEntity.getId(), sondaEntity.coordenadaAtual());
             return sondaEntity.converteParaRetorno(erro);
@@ -66,13 +67,18 @@ public class SondaService {
         }
     }
     
+    private void verificaLimiteTerreno(CoordenadaEntity coordenada) throws LimiteTerrenoException {
+        if (coordenada.getX() > 5 || coordenada.getX() < 0 || coordenada.getY() > 5 || coordenada.getY() < 0)
+            throw new LimiteTerrenoException(coordenada);
+    }
+    
     /***
      * Executa uma sequência de comandos para mover uma sonda
      * @param sondaEntity SondaEntity
      * @param comandos String de sequência de comandos
      * @return SondaEntity
      */
-    private SondaEntity executaComandos(SondaEntity sondaEntity, String comandos) throws ColisaoException {
+    private SondaEntity executaComandos(SondaEntity sondaEntity, String comandos) throws ColisaoException, LimiteTerrenoException {
         if (comandos != null && !comandos.isEmpty()) {
             log.info(String.format("Sequência de comandos: %s", comandos));
             sondaEntity.setUltimoComando(comandos);
@@ -80,6 +86,7 @@ public class SondaService {
             // itera os comandos para movimentar a sonda
             for (char comando : comandos.toCharArray()) {
                 CoordenadaEntity proxCoordenada = sondaEntity.coordenadaAtual().calculaProximaCoordenada(comando);
+                verificaLimiteTerreno(proxCoordenada);
                 verificaColisaoSonda(proxCoordenada);
                 sondaEntity.mover(comando);
                 sondaRepository.saveAndFlush(sondaEntity);
@@ -126,7 +133,7 @@ public class SondaService {
                         executaComandos(sonda, comandos.getComandos());
                         log.info(String.format("Posição final da sonda %d: %s", sonda.getId(), sonda.coordenadaAtual()));
                         return sonda.converteParaRetornoPut(index);
-                    } catch (ColisaoException ex) {
+                    } catch (ColisaoException | LimiteTerrenoException ex) {
                         String erro = String.format("%s Não é possível mover para este ponto. A sonda %d ficou parada nas coordenadas %s",
                                 ex.getMessage(), sonda.getId(), sonda.coordenadaAtual());
                         return sonda.converteParaRetornoPut(index, erro);

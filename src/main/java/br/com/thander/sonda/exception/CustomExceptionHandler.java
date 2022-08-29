@@ -9,7 +9,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,7 +22,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         
         if (ex instanceof EntityNotFoundException) {
             httpStatus = HttpStatus.NOT_FOUND;
-        } else if (ex instanceof ConstraintViolationException || ex instanceof ColisaoException) {
+        } else if (ex instanceof IllegalArgumentException || ex instanceof ColisaoException || ex instanceof LimiteTerrenoException) {
             httpStatus = HttpStatus.BAD_REQUEST;
         }
     

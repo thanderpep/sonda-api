@@ -18,6 +18,7 @@ import javax.persistence.EntityNotFoundException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -36,8 +37,8 @@ public class SondaServiceTest extends ApplicationTestConfig {
     public void criaSondaSemComando() throws ColisaoException {
         SondaDTO sondaDTO = mockSondaDTOSemComando();
         SondaEntity sondaEntity = mock(SondaEntity.class);
-        when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.empty());
         when(sondaRepository.saveAndFlush(sondaEntity)).thenReturn(sondaEntity);
+        when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.empty());
         RetornoDTO retornoDTO = sondaService.criaSonda(sondaDTO);
         Assert.isTrue(retornoDTO.getAtualX().equals(1));
         Assert.isTrue(retornoDTO.getAtualY().equals(2));
@@ -49,8 +50,8 @@ public class SondaServiceTest extends ApplicationTestConfig {
     public void criaSondaComComando() throws ColisaoException {
         SondaDTO sondaDTO = mockSondaDTOComComando();
         SondaEntity sondaEntity = mock(SondaEntity.class);
-        when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.empty());
         when(sondaRepository.saveAndFlush(sondaEntity)).thenReturn(sondaEntity);
+        when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.empty());
         RetornoDTO retornoDTO = sondaService.criaSonda(sondaDTO);
         Assert.isTrue(retornoDTO.getAtualX().equals(5));
         Assert.isTrue(retornoDTO.getAtualY().equals(1));
@@ -77,12 +78,27 @@ public class SondaServiceTest extends ApplicationTestConfig {
     public void criaSondaTentaMoverCoordenadaOcupada() throws ColisaoException {
         SondaDTO sondaDTO = mockSondaDTOComComando();
         SondaEntity sondaEntity = mock(SondaEntity.class);
+        when(sondaRepository.saveAndFlush(sondaEntity)).thenReturn(sondaEntity);
         when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.empty(), Optional.of(sondaEntity));
         RetornoDTO retornoDTO = sondaService.criaSonda(sondaDTO);
         Assert.isTrue(retornoDTO.getAtualX().equals(3));
         Assert.isTrue(retornoDTO.getAtualY().equals(3));
         Assert.isTrue(retornoDTO.getErro().equals("As coordenadas x=4, y=3 já estão ocupadas por outra sonda. " +
                 "Não é possível mover para este ponto. A sonda null ficou parada nas coordenadas x=3, y=3 apontando para Leste"));
+    }
+    
+    @Test
+    @DisplayName("Criar uma sonda e tenta mover para uma coordenada fora dos limites do terreno")
+    public void criaSondaTentaMoverLimiteTerreno() throws ColisaoException {
+        SondaDTO sondaDTO = mockSondaDTOComComandoLimiteTerreno();
+        SondaEntity sondaEntity = mock(SondaEntity.class);
+        when(sondaRepository.saveAndFlush(sondaEntity)).thenReturn(sondaEntity);
+        when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.empty());
+        RetornoDTO retornoDTO = sondaService.criaSonda(sondaDTO);
+        Assert.isTrue(retornoDTO.getAtualX().equals(0));
+        Assert.isTrue(retornoDTO.getAtualY().equals(2));
+        Assert.isTrue(retornoDTO.getErro().equals("As coordenadas x=-1, y=2 excedem os limites do terreno. " +
+                "Não é possível mover para este ponto. A sonda null ficou parada nas coordenadas x=0, y=2 apontando para Oeste"));
     }
     
     @Test
@@ -111,13 +127,22 @@ public class SondaServiceTest extends ApplicationTestConfig {
     }
     
     @Test
+    @DisplayName("Lista todas as sondas")
+    public void listaTodasSondas() {
+        SondaDTO sondaDTO1 = mockSondaDTOSemComando();
+        SondaDTO sondaDTO2 = mockSondaDTOComComando();
+        when(sondaRepository.findAll()).thenReturn(List.of(sondaDTO1.converteParaSondaEntity(), sondaDTO2.converteParaSondaEntity()));
+        List<RetornoDTO> retornoSondas = sondaService.buscaTodasSondas();
+        Assert.isTrue(retornoSondas.size() == 2);
+    }
+    
+    @Test
     @DisplayName("Busca uma sonda por Id e movimenta através de comandos")
     public void movimentaSondaPorId() {
         SondaEntity sondaEntity = mockSondaEntity();
         ComandoDTO comandos = mockComandoDTO();
-        when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.empty());
-        when(sondaRepository.saveAndFlush(sondaEntity)).thenReturn(sondaEntity);
         when(sondaRepository.findById(sondaEntity.getId())).thenReturn(Optional.of(sondaEntity));
+        when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.empty());
         RetornoDTO retornoDTO = sondaService.movimentaSondaPorId(sondaEntity.getId(), comandos);
         Assert.notNull(retornoDTO);
         Assert.isTrue(retornoDTO.getSondaId().equals(sondaEntity.getId()));
@@ -141,6 +166,20 @@ public class SondaServiceTest extends ApplicationTestConfig {
         Assert.isTrue(retornoDTO.getAtualY().equals(2));
         Assert.isTrue(retornoDTO.getErro().equals("As coordenadas x=0, y=1 já estão ocupadas por outra sonda. " +
                 "Não é possível mover para este ponto. A sonda 1 ficou parada nas coordenadas x=0, y=2 apontando para Sul"));
+    }
+    
+    @Test
+    @DisplayName("Busca uma sonda por Id e tenta mover para uma coordenada fora dos limites do terreno")
+    public void buscaSondaTentaMoverLimiteTerreno() {
+        SondaEntity sondaEntity = mockSondaEntity();
+        ComandoDTO comandos = mockComandoDTOLimiteTerreno();
+        when(sondaRepository.findById(sondaEntity.getId())).thenReturn(Optional.of(sondaEntity));
+        when(sondaRepository.findByPlanetaAndAtualXAndAtualY(any(),any(),any())).thenReturn(Optional.empty());
+        RetornoDTO retornoDTO = sondaService.movimentaSondaPorId(sondaEntity.getId(), comandos);
+        Assert.isTrue(retornoDTO.getAtualX().equals(0));
+        Assert.isTrue(retornoDTO.getAtualY().equals(2));
+        Assert.isTrue(retornoDTO.getErro().equals("As coordenadas x=-1, y=2 excedem os limites do terreno. " +
+                "Não é possível mover para este ponto. A sonda 1 ficou parada nas coordenadas x=0, y=2 apontando para Oeste"));
     }
     
     @Test
@@ -187,9 +226,25 @@ public class SondaServiceTest extends ApplicationTestConfig {
         return sonda;
     }
     
+    private SondaDTO mockSondaDTOComComandoLimiteTerreno() {
+        SondaDTO sonda = new SondaDTO();
+        sonda.setComandos("MMMMMM");
+        sonda.setPlaneta("Marte");
+        sonda.setDirecaoInical("W");
+        sonda.setInicialX(1);
+        sonda.setInicialY(2);
+        return sonda;
+    }
+    
     private ComandoDTO mockComandoDTO(){
         ComandoDTO comando = new ComandoDTO();
         comando.setComandos("LMLMLMM");
+        return comando;
+    }
+    
+    private ComandoDTO mockComandoDTOLimiteTerreno(){
+        ComandoDTO comando = new ComandoDTO();
+        comando.setComandos("MMMMMM");
         return comando;
     }
 }

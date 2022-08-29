@@ -7,6 +7,7 @@ import br.com.thander.sonda.model.dto.SondaDTO;
 import br.com.thander.sonda.service.SondaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -21,7 +22,9 @@ public class SondaController {
     
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RetornoDTO criaSonda(@RequestBody @Valid SondaDTO sondaDTO) throws ColisaoException {
+    public RetornoDTO criaSonda(@RequestBody @Valid SondaDTO sondaDTO, BindingResult errors) throws ColisaoException {
+        if (errors.hasErrors())
+            throw new IllegalArgumentException(errors.getFieldError().getDefaultMessage());
         return sondaService.criaSonda(sondaDTO);
     }
     
@@ -40,7 +43,9 @@ public class SondaController {
     
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public RetornoDTO movimentaSonda(@PathVariable("id") Long sondaId, @RequestBody @Valid ComandoDTO comandoDTO) {
+    public RetornoDTO movimentaSonda(@PathVariable("id") Long sondaId, @RequestBody @Valid ComandoDTO comandoDTO, BindingResult errors) {
+        if (errors.hasErrors())
+            throw new IllegalArgumentException(errors.getFieldError().getDefaultMessage());
         return sondaService.movimentaSondaPorId(sondaId, comandoDTO);
     }
 }

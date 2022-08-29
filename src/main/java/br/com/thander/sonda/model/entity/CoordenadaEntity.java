@@ -79,20 +79,20 @@ public class CoordenadaEntity implements Serializable {
         
         switch (this.direcao) {
             case "E":
-                if (this.x < 5)
+//                if (this.x < 5)
                     novoX++;
                 break;
-            case "S":
-                if (this.y > 0)
-                    novoY--;
-                break;
             case "W":
-                if (this.x > 0)
+//                if (this.x > 0)
                     novoX--;
                 break;
             case "N":
-                if (this.y < 5)
+//                if (this.y < 5)
                     novoY++;
+                break;
+            case "S":
+//                if (this.y > 0)
+                    novoY--;
                 break;
             default:
                 break;
