@@ -26,7 +26,9 @@ A orientação da sonda dentro do plano cartesiano usa uma rosa dos ventos como 
 ![rosa dos ventos](http://i.imgur.com/li8Ae5L.png "Rosa dos Ventos")
 
 #### Adicionais implementados:
-Foi implementado um sistema de colisão que verifica se o ponto em que a sonda irá pousar ou se mover está ocupado por outra sonda ou fora dos limites do terreno.
+1. Persistência em banco de dados relacional H2 em memória.
+
+2. Implementado um sistema de colisão que verifica se o ponto em que a sonda irá pousar ou se mover está ocupado por outra sonda ou fora dos limites do terreno:
 - `Colisão no pouso`: na tentativa de pouso (criação) de uma nova sonda, é verificado previamente se o ponto de pouso está ocupado por outra sonda, caso positivo, a sonda não será salva na base de dados e uma mensagem informativa será retornada.
 - `Colisão no movimento`: no movimento de uma sonda, é verificado previamente se o ponto de destino está ocupado por outra sonda, caso positivo, a sonda que está se movendo ficará parada no ponto percorrido até o momento e uma mensagem informativa será retornada junto às informações de saída de dados que conterão as coordenadas atuais da sonda.
 - `Movimento para fora dos limites`: no movimento de uma sonda, é verificado previamente se o ponto de destino está fora dos limites do terreno (5x5), caso positivo, a sonda que está se movendo ficará parada no ponto percorrido até o momento e uma mensagem informativa será retornada junto às informações de saída de dados que conterão as coordenadas atuais da sonda.
